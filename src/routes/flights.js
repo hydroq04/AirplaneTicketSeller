@@ -6,8 +6,8 @@ const {
   updateFlight,
   deleteFlight,
   searchFlights
-} = require('../features/flight/flightController');
-const { protect, authorize } = require('../features/auth/authMiddleware');
+} = require('../controllers/flightController');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 

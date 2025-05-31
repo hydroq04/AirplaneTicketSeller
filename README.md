@@ -1,2 +1,2 @@
 # AirplaneTicketSeller
-First README. Will update soon.
+Chạy file install.js để cày
