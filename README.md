@@ -1,62 +1,75 @@
-Airplane Ticket Seller Backend
-Backend cho ứng dụng bán vé máy bay, xây dựng bằng Node.js với các API để quản lý vé, người dùng và đặt vé.
-Tính năng
+# Airplane Ticket Seller Backend
 
-Đăng ký, đăng nhập người dùng
-Tìm kiếm và lọc chuyến bay
-Quản lý đặt vé
-API RESTful cho giao tiếp với frontend
+Backend cho ứng dụng bán vé máy bay, xây dựng bằng **Node.js** với các API để quản lý vé, người dùng và đặt vé.
 
-Công nghệ sử dụng
+## Tính năng
 
-Node.js & Express.js
-MongoDB (hoặc thay bằng database của bạn)
-JWT cho xác thực
+- Đăng ký, đăng nhập người dùng
+- Tìm kiếm và lọc chuyến bay
+- Quản lý đặt vé
+- API RESTful cho giao tiếp với frontend
 
-Yêu cầu
+## Công nghệ sử dụng
 
-Node.js (16.x trở lên)
-npm
-MongoDB (nếu sử dụng)
+- **Node.js** & **Express.js**
+- **MongoDB** (hoặc thay bằng database của bạn)
+- **JWT** cho xác thực
 
-Cài đặt
+## Yêu cầu
 
-Clone repository:
-git clone https://github.com/hydroq04/AirplaneTicketSeller.git
-cd AirplaneTicketSeller/backend
+- **Node.js** (16.x trở lên)
+- **npm**
+- **MongoDB** (nếu sử dụng)
 
+## Cài đặt
 
-Cài đặt dependencies:
-npm install
+1. Clone repository:
 
+   ```bash
+   git clone https://github.com/hydroq04/AirplaneTicketSeller.git
+   cd AirplaneTicketSeller/backend
+   ```
 
-Tạo file .env với các biến:
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/airplane-ticket-seller
-JWT_SECRET=your_jwt_secret_key
+2. Cài đặt dependencies:
 
+   ```bash
+   npm install
+   ```
 
+3. Tạo file `.env` với các biến:
 
-Chạy ứng dụng
+   ```bash
+   PORT=3000
+   MONGODB_URI=mongodb://localhost:27017/airplane-ticket-seller
+   JWT_SECRET=your_jwt_secret_key
+   ```
 
-Khởi động server:
-npm start
+## Chạy ứng dụng
 
-Hoặc dùng nodemon cho dev:
-npm run dev
+1. Khởi động server:
 
+   ```bash
+   npm start
+   ```
 
-Server chạy tại http://localhost:3000.
+   Hoặc dùng `nodemon` cho dev:
 
+   ```bash
+   npm run dev
+   ```
 
-API chính
+2. Server chạy tại `http://localhost:3000`.
 
-POST /api/auth/register: Đăng ký người dùng
-POST /api/auth/login: Đăng nhập
-GET /api/flights: Lấy danh sách chuyến bay
-POST /api/bookings: Tạo đặt vé
+## API chính
 
-Cấu trúc dự án
+- `POST /api/auth/register`: Đăng ký người dùng
+- `POST /api/auth/login`: Đăng nhập
+- `GET /api/flights`: Lấy danh sách chuyến bay
+- `POST /api/bookings`: Tạo đặt vé
+
+## Cấu trúc dự án
+
+```
 backend/
 ├── src/              # Mã nguồn
 │   ├── controllers/  # Xử lý yêu cầu API
@@ -65,12 +78,14 @@ backend/
 ├── .env              # Biến môi trường
 ├── package.json      # Dependencies và scripts
 └── README.md         # Tài liệu
+```
 
-Đóng góp
+## Đóng góp
 
-Fork repo, tạo branch mới.
-Commit thay đổi và đẩy lên.
-Tạo Pull Request.
+1. Fork repo, tạo branch mới.
+2. Commit thay đổi và đẩy lên.
+3. Tạo Pull Request.
 
-Giấy phép
+## Giấy phép
+
 MIT License
