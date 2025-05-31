@@ -33,7 +33,7 @@ Backend cho ứng dụng bán vé máy bay, xây dựng bằng **Node.js** với
 2. Cài đặt dependencies:
 
    ```bash
-   npm install
+   npm install -r requirements.txt
    ```
 
 3. Tạo file `.env` với các biến:
