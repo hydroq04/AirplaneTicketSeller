@@ -26,34 +26,57 @@ mongoose.connect('mongodb+srv://quanhoconline0112:brqr6zUuPdIWNRLm@cluster0.qn1w
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Sample route to test if server is working
+// Serve static files from the frontend directory (outside src)
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// Serve the main HTML page
 app.get('/', (req, res) => {
-  res.send('Welcome to Airplane Ticket Seller API');
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
-// Test routes for User model
-app.get('/api/users', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-app.post('/api/users', async (req, res) => {
+// User registration
+app.post('/api/users/register', async (req, res) => {
   try {
     const user = new User(req.body);
     await user.save();
-    res.status(201).json(user);
+    res.status(201).json({ success: true, userId: user._id });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
-// Test routes for Flight model
+// User login
+app.post('/api/users/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+    
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+    
+    res.json({ 
+      success: true, 
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Get all flights
 app.get('/api/flights', async (req, res) => {
   try {
     const flights = await Flight.find();
@@ -63,93 +86,103 @@ app.get('/api/flights', async (req, res) => {
   }
 });
 
-app.post('/api/flights', async (req, res) => {
+// Search flights
+app.get('/api/flights/search', async (req, res) => {
   try {
-    const flight = new Flight(req.body);
-    await flight.save();
-    res.status(201).json(flight);
+    const { origin, destination, date } = req.query;
+    
+    let query = {};
+    if (origin) query.origin = origin;
+    if (destination) query.destination = destination;
+    if (date) {
+      const searchDate = new Date(date);
+      const nextDay = new Date(searchDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      query.departureTime = {
+        $gte: searchDate,
+        $lt: nextDay
+      };
+    }
+    
+    const flights = await Flight.find(query);
+    res.json(flights);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Test routes for Booking model
-app.get('/api/bookings', async (req, res) => {
+// Create booking
+app.post('/api/bookings', async (req, res) => {
   try {
-    const bookings = await Booking.find().populate('customer').populate('tickets');
+    const { customerId, flightId, passengerDetails, seatClass } = req.body;
+    
+    // Get the flight
+    const flight = await Flight.findById(flightId);
+    if (!flight) {
+      return res.status(404).json({ success: false, message: 'Flight not found' });
+    }
+    
+    // Check seat availability
+    if (!flight.hasAvailableSeats()) {
+      return res.status(400).json({ success: false, message: 'No seats available' });
+    }
+    
+    // Generate booking reference
+    const bookingReference = Math.random().toString(36).substring(2, 10).toUpperCase();
+    
+    // Create ticket
+    const ticket = new Ticket({
+      ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
+      customer: customerId,
+      flight: flightId,
+      seatNumber: 'A' + Math.floor(Math.random() * 30),
+      class: seatClass || 'economy',
+      status: 'reserved'
+    });
+    await ticket.save();
+    
+    // Create booking
+    const booking = new Booking({
+      bookingReference,
+      customer: customerId,
+      tickets: [ticket._id],
+      totalAmount: flight.price,
+      status: 'pending',
+      contactInfo: {
+        email: passengerDetails.email,
+        phone: passengerDetails.phone
+      }
+    });
+    await booking.save();
+    
+    // Update flight available seats
+    await flight.bookSeats(1);
+    
+    res.status(201).json({ 
+      success: true, 
+      booking: {
+        id: booking._id,
+        bookingReference: booking.bookingReference,
+        totalAmount: booking.totalAmount
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Get user bookings
+app.get('/api/bookings/user/:userId', async (req, res) => {
+  try {
+    const bookings = await Booking.find({ customer: req.params.userId })
+      .populate({
+        path: 'tickets',
+        populate: { path: 'flight' }
+      });
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
-  }
-});
-
-app.post('/api/bookings', async (req, res) => {
-  try {
-    const booking = new Booking(req.body);
-    await booking.save();
-    res.status(201).json(booking);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Test routes for Ticket model
-app.get('/api/tickets', async (req, res) => {
-  try {
-    const tickets = await Ticket.find().populate('customer').populate('flight');
-    res.json(tickets);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-app.post('/api/tickets', async (req, res) => {
-  try {
-    const ticket = new Ticket(req.body);
-    await ticket.save();
-    res.status(201).json(ticket);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Test routes for Payment model
-app.get('/api/payments', async (req, res) => {
-  try {
-    const payments = await Payment.find().populate('customer');
-    res.json(payments);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-app.post('/api/payments', async (req, res) => {
-  try {
-    const payment = new Payment(req.body);
-    await payment.save();
-    res.status(201).json(payment);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Test routes for Report model
-app.get('/api/reports', async (req, res) => {
-  try {
-    const reports = await Report.find().populate('createdBy');
-    res.json(reports);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-app.post('/api/reports', async (req, res) => {
-  try {
-    const report = new Report(req.body);
-    await report.save();
-    res.status(201).json(report);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
   }
 });
 
@@ -158,4 +191,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app; // For testing purposes
+module.exports = app;

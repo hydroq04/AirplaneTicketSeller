@@ -17,7 +17,8 @@ const bookingSchema = new mongoose.Schema({
   }],
   totalAmount: {
     type: Number,
-    required: true
+    required: true,
+    min : 0
   },
   payment: {
     type: mongoose.Schema.Types.ObjectId,

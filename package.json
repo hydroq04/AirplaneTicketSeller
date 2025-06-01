@@ -18,11 +18,13 @@
   "homepage": "https://github.com/hydroq04/AirplaneTicketSeller#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2",
+    "express": "^4.21.2",
     "jsonwebtoken": "^9.0.0",
+    "mongodb": "^6.16.0",
     "mongoose": "^7.8.7"
   },
   "devDependencies": {
