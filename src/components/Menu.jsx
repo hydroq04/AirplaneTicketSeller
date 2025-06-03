@@ -2,7 +2,7 @@ import React from "react";
 
 const Menu = () => {
   return (
-    <header className="flex justify-between items-center px-6 py-4 bg-[#071d36] shadow-md">
+    <section className="flex justify-between items-center px-6 py-4 bg-[#071d36] shadow-md">
       <div className="flex flex-wrap gap-2 max-w-[500px]">
         <a href="/" className="text-2xl font-bold flex items-center gap-2">
             <span>☀️</span>
@@ -20,7 +20,7 @@ const Menu = () => {
         <span>🤍</span>
         <button className="bg-white text-[#071d36] px-4 py-1 rounded font-semibold text-sm">Đăng nhập</button>
       </div>
-    </header>
+    </section>
   );
 };
 

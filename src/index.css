@@ -17,3 +17,18 @@
 .animate-fadeInUp {
   animation: fadeInUp 1s ease-out forwards;
 }
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+}
+
+.animate-fadeOutUp {
+  animation: fadeOutUp 0.7s ease-in-out forwards;
+}
