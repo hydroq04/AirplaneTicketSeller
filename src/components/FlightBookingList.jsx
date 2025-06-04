@@ -1,7 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 
-
-
 const FlightBookingList = ({ from, to }) => {
   const fakeFlights = [
     {
@@ -24,6 +22,66 @@ const FlightBookingList = ({ from, to }) => {
       type: "Trực tiếp",
       price: 2551000,
     },
+    {
+      airline: "Vietjet Air",
+      timeFrom: "05:30",
+      timeTo: "06:30",
+      codeFrom: "CXR",
+      codeTo: "SGN",
+      duration: "1g",
+      type: "Trực tiếp",
+      price: 1570780,
+    },
+    {
+      airline: "Vietnam Airlines",
+      timeFrom: "08:55",
+      timeTo: "10:00",
+      codeFrom: "SGN",
+      codeTo: "CXR",
+      duration: "1g 05",
+      type: "Trực tiếp",
+      price: 3296000,
+    },
+    {
+      airline: "Vietjet Air",
+      timeFrom: "12:40",
+      timeTo: "13:40",
+      codeFrom: "SGN",
+      codeTo: "CXR",
+      duration: "1g",
+      type: "Trực tiếp",
+      price: 2489539,
+    },
+    {
+      airline: "Vietjet Air",
+      timeFrom: "21:05",
+      timeTo: "22:05",
+      codeFrom: "SGN",
+      codeTo: "CXR",
+      duration: "1g",
+      type: "Trực tiếp",
+      price: 1570780,
+    },
+    {
+      airline: "Vietnam Airlines",
+      timeFrom: "18:40",
+      timeTo: "19:45",
+      codeFrom: "CXR",
+      codeTo: "SGN",
+      duration: "1g 05",
+      type: "Trực tiếp",
+      price: 2551000,
+    },
+      {
+      airline: "Vietnam Airlines",
+      timeFrom: "18:40",
+      timeTo: "19:45",
+      codeFrom: "SGN",
+      codeTo: "CXR",
+      duration: "1g 05",
+      type: "Trực tiếp",
+      price: 3296000,
+    }
   ];
 
   const [open, setOpen] = useState(true);
@@ -140,8 +198,6 @@ const FlightBookingList = ({ from, to }) => {
     );
   };
 
-
-
   return (
 // ================================= BLOCK BÊN TRÁI ===========================================
     <div className="bg-gray-100 text-black p-6 max-w-6xl mx-auto">
@@ -203,13 +259,13 @@ const FlightBookingList = ({ from, to }) => {
                   <DualSlider value={departTime} setValue={setDepartTime} />
                 </div>
 
-                <div className="text-[15px] text-black leading-tight">
+                {/* <div className="text-[15px] text-black leading-tight">
                   <p className="font-medium">Quay về</p>
                   <p className="mt-1 text-[14px] text-gray-700">
                     {formatTime(returnTime[0])} – {formatTime(returnTime[1])}
                   </p>
                   <DualSlider value={returnTime} setValue={setReturnTime} />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

@@ -56,7 +56,7 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
           </div>
         </div>
 
-        <input type="date" defaultValue="2025-06-08" className="p-3 rounded-md" />
+        {/* <input type="date" defaultValue="2025-06-08" className="p-3 rounded-md" /> */}
         <input type="date" defaultValue="2025-06-15" className="p-3 rounded-md" />
         <input
           type="text"

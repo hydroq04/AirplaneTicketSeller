@@ -16,6 +16,10 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
     setTo(newTo);
     runSearch(from, newTo); // dùng luôn to mới thay vì đợi state cập nhật
   };
+  const handleSearchWithFrom = (newFrom)=>{
+    setFrom(newFrom);
+    runSearch(newFrom, to)
+  };
 
   const runSearch = (currentFrom, currentTo) => {
     let results = null;
@@ -88,6 +92,7 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
         setTo,
         setFrom,
         handleSearchWithTo,
+        handleSearchWithFrom,
         getFromTo: () => ({ from, to }),
       });
     }

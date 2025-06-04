@@ -6,9 +6,12 @@ const tabs = [
   { key: "all", label: "Mọi địa điểm hiện có" },
 ];
 
-const FlightResultListType1 = ({ resultsByTab, type }) => {
+const FlightResultListType1 = ({ resultsByTab, type, Methods }) => {
     const [activeTab, setActiveTab] = useState("cheap");
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [clickedLocal, setClickedLocal] = useState(null);
+    const [loadingLocal, setLoadingLocal] = useState(false);
+
 
     if (!resultsByTab || !resultsByTab.cheap ) {
         return null;
@@ -22,6 +25,19 @@ const FlightResultListType1 = ({ resultsByTab, type }) => {
         setIsTransitioning(false);
         }, 300); 
     };
+
+    const handleChooseLocal = (local) => {
+    if (loadingLocal) return; // tránh double click
+    setClickedLocal(local);
+    setLoadingLocal(true);
+
+    setTimeout(() => {
+        if (type === 1) Methods.handleSearchWithFrom(local);
+        else if (type === 2) Methods.handleSearchWithTo(local);
+        setLoadingLocal(false);
+    }, 800); // delay để thấy loading rõ hơn
+    };
+
 
     const currentList = resultsByTab[activeTab] || [];
 
@@ -60,14 +76,24 @@ const FlightResultListType1 = ({ resultsByTab, type }) => {
         >
             {currentList.map((flight, index) => (
                 <button
+                onClick={() => handleChooseLocal(flight.name)}
                 key={index}
-                className="bg-white rounded shadow p-4 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                disabled={loadingLocal}
+                className={`bg-white rounded shadow p-4 transition-all duration-300 transform 
+                    flex flex-col justify-between h-full text-left
+                    ${clickedLocal === flight.name ? "ring-2 ring-blue-600 scale-105" : ""}
+                    ${loadingLocal ? "opacity-60 pointer-events-none" : "hover:shadow-lg hover:scale-[1.02]"}`}
                 >
-                    <h3 className="text-xl font-bold">{flight.name}</h3>
-                    <p className="text-sm text-gray-500">Các chuyến bay có giá từ</p>
+                <h3 className="text-xl font-bold mb-1">{flight.name}</h3>
+                <p className="text-sm text-gray-500">Các chuyến bay có giá từ</p>
+                <div className="flex items-center justify-between mt-2">
                     <p className="text-xl font-semibold text-right">
-                        {flight.price.toLocaleString()} ₫
+                    {flight.price.toLocaleString()} ₫
                     </p>
+                    {clickedLocal === flight.name && loadingLocal && (
+                    <div className="loader ml-2" />
+                    )}
+                </div>
                 </button>
             ))}
         </div>

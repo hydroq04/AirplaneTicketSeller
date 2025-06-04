@@ -52,6 +52,7 @@ function App() {
           }, 0);
         }}
         bookingRoute ={bookingRoute}
+        Methods={methods}
       />
     </div>
   );
