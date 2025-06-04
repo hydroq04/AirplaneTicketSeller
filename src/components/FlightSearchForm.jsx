@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import FlightSearchFormFull from "./FlightSearchFormFull";
 import FlightSearchBarCompact from "./FlightSearchBarCompact";
 
-const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
+const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel }) => {
   const [from, setFrom] = useState("Việt Nam");
   const [to, setTo] = useState("TP.HCM");
   const [showForm, setShowForm] = useState(true);
@@ -24,7 +24,11 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
   const runSearch = (currentFrom, currentTo) => {
     let results = null;
 
-    if (currentFrom === "Việt Nam" && currentTo === "Việt Nam") {
+    let country= "Việt Nam";
+    if (RegionModel?.getCountry){
+      country=RegionModel.getCountry()
+    }
+    if (currentFrom === country && currentTo === country) {
       results = {
         cheap: [
           { name: "Nha Trang", price: 1571965 },
@@ -43,7 +47,7 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
           { name: "Hải Phòng", price: 4043128 }
         ]
       };
-    } else if (currentFrom === "Việt Nam") {
+    } else if (currentFrom === country) {
       results = {
         cheap: [
           { name: "Phú Quốc", price: 2200000 },
@@ -60,7 +64,7 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
           { name: "Huế", price: 3500000 },
         ],
       };
-    } else if (currentTo === "Việt Nam") {
+    } else if (currentTo === country) {
       results = {
         cheap: [
           { name: "Phú Quốc", price: 2200000 },

@@ -23,7 +23,6 @@ const FlightResultList = ({ resultsByTab, type, setToAndSearch, bookingRoute, Me
       );
     case 3:
       const { from, to } = bookingRoute;
-      console.log(from, to)
       return (
         <FlightBookingList
           from={from}

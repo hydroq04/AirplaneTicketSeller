@@ -42,7 +42,7 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
             onClick={handleSwap}
             className="absolute left-1/2 -translate-x-1/2 bg-white border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center shadow z-10"
           >
-            🔁
+            ⇄
           </button>
 
           <div className="flex-1 p-4 border-l pl-6">

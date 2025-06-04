@@ -3,6 +3,9 @@ import Menu from "./components/Menu";
 import Home from "./pages/Home";
 import FlightSearchForm from "./components/FlightSearchForm";
 import FlightResultList from "./components/FlightResultList";
+import LoginModal from "./pages/LoginModal";
+import RegionSettingsModal from "./pages/RegionSettingsModal";
+
 
 function App() {
   const [flightResults, setFlightResults] = useState(null);
@@ -11,11 +14,19 @@ function App() {
   const [chooseType, SetChooseType] = useState(1);
   const [methods, setMethods] = useState(null);
   const [bookingRoute, setBookingRoute] = useState(null);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [showRegionModal, setShowRegionModal] = useState(false);
+  const [RegionModel, setRegionModel] = useState(null)
 
 
   return (
     <div className="min-h-screen text-white font-sans">
-      <Menu scale_Menu={scale} />
+      <Menu 
+        scale_Menu={scale}
+        setIsLoginOpen = {setIsLoginOpen}
+        setShowRegionModal = {setShowRegionModal}
+        RegionModel={RegionModel}
+       />
       <Home isVisible={showHome} />
 
       <FlightSearchForm
@@ -25,17 +36,22 @@ function App() {
           setScalMenu(true);
         }}
         ChooseType={(from, to) => {
+          let country= "Việt Nam";
+          if (RegionModel?.getCountry){
+            country=RegionModel.getCountry()
+          }
           setBookingRoute({ from, to });
-          if (from === "Việt Nam" && to === "Việt Nam") {
+          if (from === country && to === country) {
             SetChooseType(0);
-          } else if (from === "Việt Nam" || to === "Việt Nam") {
-            if (from === "Việt Nam") SetChooseType(1);
+          } else if (from === country || to === country) {
+            if (from === country) SetChooseType(1);
             else SetChooseType(2);
           } else {
             SetChooseType(3);
           }
         }}
         exposeMethods={setMethods}
+        RegionModel={RegionModel}
       />
 
       <FlightResultList
@@ -53,6 +69,14 @@ function App() {
         }}
         bookingRoute ={bookingRoute}
         Methods={methods}
+      />
+
+
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <RegionSettingsModal
+        isOpen={showRegionModal}
+        onClose={() => setShowRegionModal(false)}
+        exposeRegionModel = {setRegionModel}
       />
     </div>
   );
