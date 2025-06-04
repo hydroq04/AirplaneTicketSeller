@@ -10,8 +10,7 @@ function App() {
   const [scale, setScalMenu] = useState(false);
   const [chooseType, SetChooseType] = useState(1);
   const [methods, setMethods] = useState(null);
-  const [isWaitingResult, setIsWaitingResult] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null);
+  const [bookingRoute, setBookingRoute] = useState(null);
 
 
   return (
@@ -24,9 +23,9 @@ function App() {
           setFlightResults(results);
           setShowHome(false);
           setScalMenu(true);
-          setIsWaitingResult(true); // cho phép hiển thị FlightResultList
         }}
         ChooseType={(from, to) => {
+          setBookingRoute({ from, to });
           if (from === "Việt Nam" && to === "Việt Nam") {
             SetChooseType(0);
           } else if (from === "Việt Nam" || to === "Việt Nam") {
@@ -39,28 +38,21 @@ function App() {
         exposeMethods={setMethods}
       />
 
-      {/* ✅ Chỉ hiển thị khi có kết quả và không bị ẩn tạm thời */}
-      {flightResults && isWaitingResult && (
-        <FlightResultList
-          resultsByTab={flightResults}
-          type={chooseType}
-          setToAndSearch={(to) => {
-            if (!methods) return;
-
-            setIsWaitingResult(false); // Tạm ẩn kết quả để tránh chớp
-
-            // Delay nhỏ rồi thực hiện chuyển
+      <FlightResultList
+        resultsByTab={flightResults}
+        type={chooseType}
+        setToAndSearch={(to) => {
+          if (!methods) return;
+          setTimeout(() => {
+            methods.handleSearchWithTo(to);
+            const { from } = methods.getFromTo();
+            setBookingRoute({ from, to });
             setTimeout(() => {
-              methods.handleSearchWithTo(to);
-
-              // Cho hiện lại kết quả sau khi đã cập nhật xong
-              setTimeout(() => {
-                setIsWaitingResult(true);
-              }, 100); // bạn có thể tăng lên nếu vẫn thấy nháy
-            }, 0);
-          }}
-        />
-      )}
+            }, 100);
+          }, 0);
+        }}
+        bookingRoute ={bookingRoute}
+      />
     </div>
   );
 }

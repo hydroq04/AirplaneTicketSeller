@@ -12,13 +12,11 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
     runSearch(from, to);
   };
 
-  // 👉 Hàm này dùng khi muốn truyền to mới từ bên ngoài
   const handleSearchWithTo = (newTo) => {
     setTo(newTo);
     runSearch(from, newTo); // dùng luôn to mới thay vì đợi state cập nhật
   };
 
-  // 👉 Tách phần xử lý chung để dùng cho cả 2 trường hợp
   const runSearch = (currentFrom, currentTo) => {
     let results = null;
 
@@ -83,12 +81,12 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods }) => {
     ChooseType(currentFrom, currentTo);
   };
 
-  // 👉 Cho component cha lấy được method này
   useEffect(() => {
     if (exposeMethods) {
       exposeMethods({
         handleSearch,
         setTo,
+        setFrom,
         handleSearchWithTo,
         getFromTo: () => ({ from, to }),
       });
