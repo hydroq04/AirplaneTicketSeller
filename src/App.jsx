@@ -2,43 +2,64 @@ import React, { useState } from "react";
 import Menu from "./components/Menu";
 import Home from "./pages/Home";
 import FlightSearchForm from "./components/FlightSearchForm";
+import FlightResultList from "./components/FlightResultList";
 
 function App() {
-
-  const [flightResults, setFlightResults] = useState([]);
+  const [flightResults, setFlightResults] = useState(null);
   const [showHome, setShowHome] = useState(true);
-  const [scale, setScalMenu] = useState(false)
+  const [scale, setScalMenu] = useState(false);
+  const [chooseType, SetChooseType] = useState(1);
+  const [methods, setMethods] = useState(null);
+  const [isWaitingResult, setIsWaitingResult] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
+
   return (
-    <div className="min-h-screen  text-white font-sans">
+    <div className="min-h-screen text-white font-sans">
       <Menu scale_Menu={scale} />
       <Home isVisible={showHome} />
-      <FlightSearchForm onSearch={(results) => {
-        setFlightResults(results)
-        setShowHome(false)
-        setScalMenu(true)
-      }} />
 
-      {flightResults.length > 0 && (
-        <div className="bg-gray-100 text-black py-8 px-4">
-          <h2 className="text-2xl font-bold mb-4 text-center">Chọn địa điểm khởi hành</h2>
-          <div className="flex justify-center gap-2 mb-6">
-            <button className="bg-[#071d36] text-white px-4 py-2 rounded">Chuyến bay rẻ nhất</button>
-            <button className="border px-4 py-2 rounded">Chuyến bay thẳng</button>
-            <button className="border px-4 py-2 rounded">Mọi địa điểm hiện có</button>
-          </div>
+      <FlightSearchForm
+        onSearch={(results) => {
+          setFlightResults(results);
+          setShowHome(false);
+          setScalMenu(true);
+          setIsWaitingResult(true); // cho phép hiển thị FlightResultList
+        }}
+        ChooseType={(from, to) => {
+          if (from === "Việt Nam" && to === "Việt Nam") {
+            SetChooseType(0);
+          } else if (from === "Việt Nam" || to === "Việt Nam") {
+            if (from === "Việt Nam") SetChooseType(1);
+            else SetChooseType(2);
+          } else {
+            SetChooseType(3);
+          }
+        }}
+        exposeMethods={setMethods}
+      />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {flightResults.map((flight, index) => (
-              <div key={index} className="bg-white rounded shadow p-4">
-                <h3 className="text-xl font-bold">{flight.name}</h3>
-                <p className="text-sm text-gray-500">Các chuyến bay có giá từ</p>
-                <p className="text-xl font-semibold text-right">
-                  {flight.price.toLocaleString()} ₫
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* ✅ Chỉ hiển thị khi có kết quả và không bị ẩn tạm thời */}
+      {flightResults && isWaitingResult && (
+        <FlightResultList
+          resultsByTab={flightResults}
+          type={chooseType}
+          setToAndSearch={(to) => {
+            if (!methods) return;
+
+            setIsWaitingResult(false); // Tạm ẩn kết quả để tránh chớp
+
+            // Delay nhỏ rồi thực hiện chuyển
+            setTimeout(() => {
+              methods.handleSearchWithTo(to);
+
+              // Cho hiện lại kết quả sau khi đã cập nhật xong
+              setTimeout(() => {
+                setIsWaitingResult(true);
+              }, 100); // bạn có thể tăng lên nếu vẫn thấy nháy
+            }, 0);
+          }}
+        />
       )}
     </div>
   );
