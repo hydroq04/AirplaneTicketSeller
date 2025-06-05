@@ -21,7 +21,8 @@ function App() {
   const [Login, setLogin] = useState(null)
   const [showResults, setShowResults] = useState(false);
   const [favorites, setFavorites] = useState([]);
-
+  const [info, setInfo] = useState(null)
+  const [BoughtList, setBoughtList] = useState([])
 
 
   const setUpLogin = () => {
@@ -86,6 +87,7 @@ function App() {
         }}
         exposeMethods={setMethods}
         RegionModel={RegionModel}
+        setInfo = {setInfo}
       />
 
       {showResults &&
@@ -107,6 +109,9 @@ function App() {
         setLogin={Login}
         favorites={favorites}
         setFavorites={setFavorites}
+        info={info}
+        setBoughtList = {setBoughtList}
+        BoughtList={BoughtList}
       />)}
 
 

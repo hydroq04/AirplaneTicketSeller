@@ -13,7 +13,7 @@ const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel, switchToHome}) =
     }
   return (
     <section className="flex justify-between items-center px-6 py-4 bg-[#071d36] shadow-md">
-      <div className="flex flex-wrap gap-2 max-w-[500px]">
+      <div className="flex flex-wrap gap-2 max-w-[400px]">
       <div
         onClick={switchToHome}
         className="text-2xl font-bold flex items-center gap-2 cursor-pointer select-none"
@@ -25,7 +25,7 @@ const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel, switchToHome}) =
         <div className="flex gap-2">
           <button className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm">Các Chuyến Bay</button>
           <button className="border border-white px-4 py-2 rounded-full text-sm">Các chuyến đã đặt</button>
-          <button className="border border-white px-4 py-2 rounded-full text-sm">Báo cáo</button>
+          {/* <button className="border border-white px-4 py-2 rounded-full text-sm">Báo cáo</button> */}
         </div>
       </div>
       <div className="flex items-center gap-4">

@@ -1,13 +1,51 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
+import PassengerClassSelector from "./PassengerClassSelector";
 
-const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSearch, showForm }) => {
+const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSearch, showForm, setSumPassenger, departureDate, setDepartureDate, setInfo }) => {
+  const [passengerData, setPassengerData] = useState({
+    adults: 1,
+    children: 0,
+    travelClass: "Phổ thông"
+  });
+
+  const [showPassengerSelector, setShowPassengerSelector] = useState(false);
+  const passengerRef = useRef(null);
+  const [popupPosition, setPopupPosition] = useState("top"); // "top" hoặc "bottom"
+
+  const formatPassengerText = () => {
+    const total = passengerData.adults + passengerData.children;
+    setSumPassenger(total)
+    return `${total} ${(total>1)?"hành khách":"người lớn"}, ${passengerData.travelClass}`;
+  };
+
+  useEffect(() => {
+    if(setInfo){
+      setInfo({
+        getInfo: () => ({passengerData, departureDate})
+      })
+    }
+  }, [passengerData, departureDate]);
+  const handlePassengerClick = (e) => {
+    const rect = passengerRef.current.getBoundingClientRect();
+    const spaceAbove = rect.top;
+    const spaceBelow = window.innerHeight - rect.bottom;
+
+    // Ưu tiên hiện phía trên nếu đủ chỗ
+    if (spaceAbove > 320 || spaceAbove > spaceBelow) {
+      setPopupPosition("top");
+    } else {
+      setPopupPosition("bottom");
+    }
+
+    setShowPassengerSelector(true);
+  };
+
   return (
-        <section
-        className={`bg-[#061c37] text-white p-4 rounded-xl transition-all duration-700 ease-in-out 
-            overflow-hidden origin-top 
-            ${showForm ? "opacity-100 scale-y-100 pointer-events-auto" : "opacity-0 scale-y-0 pointer-events-none"}`}
-        >
-
+    <section
+      className={`bg-[#061c37] text-white p-4 rounded-xl transition-all duration-700 ease-in-out 
+        overflow-visible origin-top 
+        ${showForm ? "opacity-100 scale-y-100 pointer-events-auto" : "opacity-0 scale-y-0 pointer-events-none"}`}
+    >
       {/* Tabs */}
       <div className="flex gap-4 mb-4 text-sm font-medium">
         <label className="flex items-center gap-2">
@@ -26,6 +64,7 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
 
       {/* Form main */}
       <div className="flex flex-col md:flex-row gap-2 text-black">
+        {/* Từ - Đến */}
         <div className="relative flex items-center gap-0 bg-white rounded-xl overflow-hidden flex-grow">
           <div className="flex-1 p-4 border-r">
             <label className="text-xs text-gray-500 block mb-1">Từ</label>
@@ -56,14 +95,28 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
           </div>
         </div>
 
-        {/* <input type="date" defaultValue="2025-06-08" className="p-3 rounded-md" /> */}
-        <input type="date" defaultValue="2025-06-15" className="p-3 rounded-md" />
-        <input
-          type="text"
-          value="1 người lớn, Phổ thông"
-          readOnly
-          className="p-3 rounded-md"
-        />
+        {/* Ngày & Hành khách */}
+        <input type="date" value={departureDate} onChange={(e) => setDepartureDate(e.target.value)} className="p-3 rounded-md" />
+
+        <div
+          ref={passengerRef}
+          onClick={handlePassengerClick}
+          className="relative p-3 rounded-md bg-white cursor-pointer border border-gray-300 hover:shadow-md min-w-[230px]"
+        >
+          {formatPassengerText()}
+
+          {showPassengerSelector && (
+            <div className={`absolute z-[9999] left-0 ${popupPosition === "top" ? "bottom-full mb-2" : "top-full mt-2"}`}>
+              <PassengerClassSelector
+                value={passengerData}
+                onChange={(data) => setPassengerData(data)}
+                onClose={() => setShowPassengerSelector(false)}
+                position={popupPosition}
+              />
+            </div>
+          )}
+        </div>
+
         <button
           onClick={handleSearch}
           className="bg-blue-500 text-white px-6 rounded-md hover:bg-blue-600"

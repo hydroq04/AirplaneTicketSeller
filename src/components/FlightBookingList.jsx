@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
+import FlightDetailPanel from "./FlightDetailPanel "
 
-const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites}) => {
+const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, info, setBoughtList, BoughtList}) => {
   const fakeFlights = [
     {
       id: "#01",
@@ -110,19 +111,11 @@ const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites}) => {
     "Vietnam Airlines",
     "Các kết hợp hàng không",
   ]);
+  const [selectedFlight, setSelectedFlight] = useState(null);
+
   // Đổi tên ref cho rõ ràng hơn
   const airlinesRef = useRef(null);
   const [airlinesHeight, setAirlinesHeight] = useState(0);
-  let inMemoryFavorites = [];
-
-  const getFavorites = () => {
-    return inMemoryFavorites;
-  };
-
-  const saveFavorites = (favorites) => {
-    inMemoryFavorites = favorites;
-  };
-
 
   const toggleFavorite = (id) => {
     if (setLogin.isLogin()){
@@ -131,7 +124,6 @@ const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites}) => {
         : [...favorites, id];
 
       setFavorites(updated);
-      saveFavorites(updated);
     }
     else setLogin.setIsLoginOpen(true)
   };
@@ -471,13 +463,29 @@ const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites}) => {
                   <p className="text-xl font-bold text-black">
                     {flight.price.toLocaleString()} ₫
                   </p>
-                  <button className="mt-2 px-4 py-1 bg-[#071d36] text-white rounded hover:bg-blue-800 text-sm font-semibold">
-                    Chọn →
-                  </button>
+                    <button
+                      className="mt-2 px-4 py-1 bg-[#071d36] text-white rounded hover:bg-blue-800 text-sm font-semibold"
+                      onClick={() => setSelectedFlight(flight)}
+                    >
+                      Chọn →
+                    </button>
+
                 </div>
               </div>
             );
           })}
+          
+          <FlightDetailPanel
+            selectedFlight={selectedFlight}
+            onClose={() => setSelectedFlight(null)}
+            info={info}
+            setBoughtList={setBoughtList}
+            BoughtList={BoughtList}
+            setLogin={setLogin}
+          />
+
+
+
         </div>
       </div>
     </div>
