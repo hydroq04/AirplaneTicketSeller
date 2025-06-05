@@ -21,6 +21,13 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel }) 
     runSearch(newFrom, to)
   };
 
+  const resetFlightSearchForm = () => {
+    setFrom("Việt Nam");
+    setTo("TP.HCM");
+    setShowForm(true);
+    setPosition(-300);
+  };
+
   const runSearch = (currentFrom, currentTo) => {
     let results = null;
 
@@ -98,6 +105,7 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel }) 
         handleSearchWithTo,
         handleSearchWithFrom,
         getFromTo: () => ({ from, to }),
+        resetFlightSearchForm,
       });
     }
   }, [from, to]);

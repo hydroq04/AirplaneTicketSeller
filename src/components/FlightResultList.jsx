@@ -3,7 +3,7 @@ import FlightResultListType0 from "./FlightResultListType0";
 import FlightResultListType1 from "./FlightResultListType1";
 import FlightBookingList from "./FlightBookingList";
 
-const FlightResultList = ({ resultsByTab, type, setToAndSearch, bookingRoute, Methods }) => {
+const FlightResultList = ({ resultsByTab, type, setToAndSearch, bookingRoute, Methods, setLogin, favorites, setFavorites }) => {
   switch (type) {
     case 0:
       return (
@@ -27,6 +27,9 @@ const FlightResultList = ({ resultsByTab, type, setToAndSearch, bookingRoute, Me
         <FlightBookingList
           from={from}
           to={to}
+          setLogin = {setLogin}
+          favorites={favorites}
+          setFavorites={setFavorites}
         />
       );
     default:

@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 
-const FlightBookingList = ({ from, to }) => {
+const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites}) => {
   const fakeFlights = [
     {
+      id: "#01",
       airline: "Vietjet Air",
       timeFrom: "21:05",
       timeTo: "22:05",
@@ -13,6 +14,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 1570780,
     },
     {
+      id: "#02",
       airline: "Vietnam Airlines",
       timeFrom: "18:40",
       timeTo: "19:45",
@@ -23,6 +25,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 2551000,
     },
     {
+      id:"#03",
       airline: "Vietjet Air",
       timeFrom: "05:30",
       timeTo: "06:30",
@@ -33,6 +36,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 1570780,
     },
     {
+      id: "#04",
       airline: "Vietnam Airlines",
       timeFrom: "08:55",
       timeTo: "10:00",
@@ -43,6 +47,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 3296000,
     },
     {
+      id: "#05",
       airline: "Vietjet Air",
       timeFrom: "12:40",
       timeTo: "13:40",
@@ -53,6 +58,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 2489539,
     },
     {
+      id: "#06",
       airline: "Vietjet Air",
       timeFrom: "21:05",
       timeTo: "22:05",
@@ -63,6 +69,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 1570780,
     },
     {
+      id: "#07",
       airline: "Vietnam Airlines",
       timeFrom: "18:40",
       timeTo: "19:45",
@@ -73,6 +80,7 @@ const FlightBookingList = ({ from, to }) => {
       price: 2551000,
     },
       {
+      id: "#08",
       airline: "Vietnam Airlines",
       timeFrom: "18:40",
       timeTo: "19:45",
@@ -105,6 +113,30 @@ const FlightBookingList = ({ from, to }) => {
   // Đổi tên ref cho rõ ràng hơn
   const airlinesRef = useRef(null);
   const [airlinesHeight, setAirlinesHeight] = useState(0);
+  let inMemoryFavorites = [];
+
+  const getFavorites = () => {
+    return inMemoryFavorites;
+  };
+
+  const saveFavorites = (favorites) => {
+    inMemoryFavorites = favorites;
+  };
+
+
+  const toggleFavorite = (id) => {
+    if (setLogin.isLogin()){
+          const updated = favorites.includes(id)
+        ? favorites.filter((f) => f !== id)
+        : [...favorites, id];
+
+      setFavorites(updated);
+      saveFavorites(updated);
+    }
+    else setLogin.setIsLoginOpen(true)
+  };
+
+
 
   useEffect(() => {
     if (airlinesOpen && airlinesRef.current) {
@@ -388,38 +420,64 @@ const FlightBookingList = ({ from, to }) => {
 {/* ================================== BLOCK BÊN PHẢI ======================================================= */}
         {/* Danh sách chuyến bay */}
         <div className="md:col-span-3 space-y-4">
-          {fakeFlights.map((flight, idx) => (
-            <div
-              key={idx}
-              className="bg-white border rounded-lg p-4 shadow hover:shadow-md transition-all flex justify-between items-center"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-24 text-center font-semibold text-sm">
-                  {flight.airline}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 text-lg font-bold">
-                    <span>{flight.timeFrom}</span>
-                    <span>→</span>
-                    <span>{flight.timeTo}</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {flight.codeFrom} → {flight.codeTo} • {flight.duration} •{" "}
-                    {flight.type}
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <p className="text-blue-700 font-bold text-lg">
-                  {flight.price.toLocaleString()} ₫
-                </p>
-                <button className="mt-2 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Chọn →
+          {fakeFlights.map((flight, idx) => {
+            const isFavorite = favorites.includes(flight.id);
+            return (
+              <div
+                key={idx}
+                className="bg-white border rounded-xl px-6 py-4 shadow-sm hover:shadow-md transition-all flex justify-between items-center"
+              >
+                {/* Nút trái tim yêu thích */}
+                <button
+                  onClick={() => toggleFavorite(flight.id)}
+                  className={`mr-4 w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-300
+                              ${isFavorite ? "bg-blue-100 border-blue-300" : "hover:bg-gray-100 border-transparent"}`}
+                  title={isFavorite ? "Đã lưu" : "Lưu vào yêu thích"}
+                >
+                  <span
+                    className={`text-lg transition-all duration-300 ease-in-out transform
+                                ${isFavorite ? "text-blue-600 scale-110" : "text-gray-400 hover:scale-110"}`}
+                  >
+                    ♥
+                  </span>
                 </button>
+                {/* Bên trái: Thông tin chuyến bay */}
+                <div className="flex items-center gap-6 flex-1">
+                  {/* Tên hãng */}
+                  <div className="w-20 text-sm font-semibold text-center text-gray-700">
+                    {flight.airline}
+                  </div>
+
+                  {/* Thời gian bay */}
+                  <div>
+                    <div className="flex items-center gap-2 text-lg font-semibold text-black">
+                      <span>{flight.timeFrom}</span>
+                      <span className="text-gray-400">→</span>
+                      <span>{flight.timeTo}</span>
+                    </div>
+                    <div className="text-sm text-gray-500 flex items-center gap-2">
+                      <span>{flight.codeFrom} → {flight.codeTo}</span>
+                      <span>•</span>
+                      <span>{flight.duration}</span>
+                      <span>•</span>
+                      <span className="text-green-600">{flight.type}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bên phải: Giá + nút chọn */}
+                <div className="text-right min-w-[130px]">
+                  <p className="text-xs text-gray-500">1 tùy chọn từ</p>
+                  <p className="text-xl font-bold text-black">
+                    {flight.price.toLocaleString()} ₫
+                  </p>
+                  <button className="mt-2 px-4 py-1 bg-[#071d36] text-white rounded hover:bg-blue-800 text-sm font-semibold">
+                    Chọn →
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from "react";
 
-const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel}) => {
+const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel, switchToHome}) => {
     if (!RegionModel) return;
     
     const { language, country, currency } = RegionModel.getLCC();
@@ -14,10 +14,14 @@ const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel}) => {
   return (
     <section className="flex justify-between items-center px-6 py-4 bg-[#071d36] shadow-md">
       <div className="flex flex-wrap gap-2 max-w-[500px]">
-        <a href="/" className="text-2xl font-bold flex items-center gap-2">
-            <span>☀️</span>
-            <span>Airplane Ticket Seller</span>
-        </a>
+      <div
+        onClick={switchToHome}
+        className="text-2xl font-bold flex items-center gap-2 cursor-pointer select-none"
+      >
+        <span role="img" aria-label="sun">☀️</span>
+        <span>AeroTech</span>
+      </div>
+
         <div className="flex gap-2">
           <button className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm">Các Chuyến Bay</button>
           <button className="border border-white px-4 py-2 rounded-full text-sm">Các chuyến đã đặt</button>

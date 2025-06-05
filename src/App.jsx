@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, use } from "react";
 import Menu from "./components/Menu";
 import Home from "./pages/Home";
 import FlightSearchForm from "./components/FlightSearchForm";
@@ -17,15 +17,48 @@ function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [showRegionModal, setShowRegionModal] = useState(false);
   const [RegionModel, setRegionModel] = useState(null)
+  const [logined, setLogined] = useState(false)
+  const [Login, setLogin] = useState(null)
+  const [showResults, setShowResults] = useState(false);
+  const [favorites, setFavorites] = useState([]);
 
+
+
+  const setUpLogin = () => {
+    if (!logined) {
+      setIsLoginOpen(true)
+    }
+  }
+  const resetToHome = () => {
+    setShowHome(true);       // hiện trang Home
+    setFlightResults(null);  // ẩn kết quả tìm kiếm
+    setScalMenu(false);      // thu menu lại
+    setShowResults(false); 
+    if (methods?.resetFlightSearchForm) {
+      methods.resetFlightSearchForm();   // reset lại form input
+    }
+  };
+
+  useEffect(() => {
+    if (setLogin) {
+      setLogin({
+        setUpLogin,
+        setLogined,
+        setIsLoginOpen,
+        isLogin: () => logined
+      })
+    }
+  }, [logined]);
 
   return (
     <div className="min-h-screen text-white font-sans">
       <Menu 
+        switchToHome={resetToHome}
         scale_Menu={scale}
         setIsLoginOpen = {setIsLoginOpen}
         setShowRegionModal = {setShowRegionModal}
         RegionModel={RegionModel}
+        methods = {methods}
        />
       <Home isVisible={showHome} />
 
@@ -34,6 +67,7 @@ function App() {
           setFlightResults(results);
           setShowHome(false);
           setScalMenu(true);
+          setShowResults(true);
         }}
         ChooseType={(from, to) => {
           let country= "Việt Nam";
@@ -54,7 +88,8 @@ function App() {
         RegionModel={RegionModel}
       />
 
-      <FlightResultList
+      {showResults &&
+      (<FlightResultList
         resultsByTab={flightResults}
         type={chooseType}
         setToAndSearch={(to) => {
@@ -69,10 +104,16 @@ function App() {
         }}
         bookingRoute ={bookingRoute}
         Methods={methods}
-      />
+        setLogin={Login}
+        favorites={favorites}
+        setFavorites={setFavorites}
+      />)}
 
 
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <LoginModal 
+      isOpen={isLoginOpen} 
+      onClose={() => setIsLoginOpen(false)}
+      setLogin={Login} />
       <RegionSettingsModal
         isOpen={showRegionModal}
         onClose={() => setShowRegionModal(false)}
