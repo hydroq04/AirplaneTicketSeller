@@ -1,6 +1,6 @@
 import React from "react";
 
-const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel, switchToHome}) => {
+const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel, switchToHome, setShowSearch, showSearch, hidden, visible}) => {
     if (!RegionModel) return;
     
     const { language, country, currency } = RegionModel.getLCC();
@@ -22,11 +22,24 @@ const Menu = ({setIsLoginOpen, setShowRegionModal, RegionModel, switchToHome}) =
         <span>AeroTech</span>
       </div>
 
-        <div className="flex gap-2">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm">Các Chuyến Bay</button>
-          <button className="border border-white px-4 py-2 rounded-full text-sm">Các chuyến đã đặt</button>
-          {/* <button className="border border-white px-4 py-2 rounded-full text-sm">Báo cáo</button> */}
-        </div>
+      <div className="flex gap-2">
+        <button
+          onClick={visible}
+          className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out
+            ${showSearch ? "bg-blue-500 text-white" : "border border-white text-white"}`}
+        >
+          Các Chuyến Bay
+        </button>
+        <button
+          onClick={hidden}
+          className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out
+            ${!showSearch ? "bg-blue-500 text-white" : "border border-white text-white"}`}
+        >
+          Các chuyến đã đặt
+        </button>
+      </div>
+
+
       </div>
       <div className="flex items-center gap-4">
         <span className="text-sm">Trợ giúp</span>

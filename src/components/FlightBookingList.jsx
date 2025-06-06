@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import FlightDetailPanel from "./FlightDetailPanel "
 
-const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, info, setBoughtList, BoughtList}) => {
+const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, setSelectedFlight}) => {
   const fakeFlights = [
     {
       id: "#01",
@@ -111,7 +111,7 @@ const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, info, 
     "Vietnam Airlines",
     "Các kết hợp hàng không",
   ]);
-  const [selectedFlight, setSelectedFlight] = useState(null);
+
 
   // Đổi tên ref cho rõ ràng hơn
   const airlinesRef = useRef(null);
@@ -474,18 +474,6 @@ const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, info, 
               </div>
             );
           })}
-          
-          <FlightDetailPanel
-            selectedFlight={selectedFlight}
-            onClose={() => setSelectedFlight(null)}
-            info={info}
-            setBoughtList={setBoughtList}
-            BoughtList={BoughtList}
-            setLogin={setLogin}
-          />
-
-
-
         </div>
       </div>
     </div>

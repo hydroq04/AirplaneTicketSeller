@@ -5,7 +5,8 @@ import FlightSearchForm from "./components/FlightSearchForm";
 import FlightResultList from "./components/FlightResultList";
 import LoginModal from "./pages/LoginModal";
 import RegionSettingsModal from "./pages/RegionSettingsModal";
-
+import BoughtTicketsList from "./components/BoughtTicketsList";
+import FlightDetailPanel from "./components/FlightDetailPanel ";
 
 function App() {
   const [flightResults, setFlightResults] = useState(null);
@@ -23,7 +24,11 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [info, setInfo] = useState(null)
   const [BoughtList, setBoughtList] = useState([])
-
+  const [showSearch, setShowSearch] = useState(true)
+  const [showBought, setShowBought] = useState(false)
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null)
+  const [index, setIndex] = useState(1)
 
   const setUpLogin = () => {
     if (!logined) {
@@ -32,24 +37,25 @@ function App() {
   }
   const resetToHome = () => {
     setShowHome(true);       // hiện trang Home
+    setShowSearch(true)
     setFlightResults(null);  // ẩn kết quả tìm kiếm
     setScalMenu(false);      // thu menu lại
     setShowResults(false); 
+    setShowBought(false)
     if (methods?.resetFlightSearchForm) {
       methods.resetFlightSearchForm();   // reset lại form input
     }
   };
 
   useEffect(() => {
-    if (setLogin) {
-      setLogin({
-        setUpLogin,
-        setLogined,
-        setIsLoginOpen,
-        isLogin: () => logined
-      })
-    }
-  }, [logined]);
+    setLogin({
+      setUpLogin,
+      setLogined,
+      setIsLoginOpen,
+      isLogin: () => logined
+    });
+  }, [logined, setLogin]);
+
 
   return (
     <div className="min-h-screen text-white font-sans">
@@ -60,60 +66,86 @@ function App() {
         setShowRegionModal = {setShowRegionModal}
         RegionModel={RegionModel}
         methods = {methods}
+        setShowSearch = {setShowSearch}
+        showSearch = {showSearch}
+        hidden = {()=>{
+          setShowSearch(false)
+          setShowResults(false)
+          setShowHome(false)
+          setShowBought(true)
+        }}
+        visible={resetToHome}
        />
-      <Home isVisible={showHome} />
-
-      <FlightSearchForm
-        onSearch={(results) => {
-          setFlightResults(results);
-          setShowHome(false);
-          setScalMenu(true);
-          setShowResults(true);
-        }}
-        ChooseType={(from, to) => {
-          let country= "Việt Nam";
-          if (RegionModel?.getCountry){
-            country=RegionModel.getCountry()
-          }
-          setBookingRoute({ from, to });
-          if (from === country && to === country) {
-            SetChooseType(0);
-          } else if (from === country || to === country) {
-            if (from === country) SetChooseType(1);
-            else SetChooseType(2);
-          } else {
-            SetChooseType(3);
-          }
-        }}
-        exposeMethods={setMethods}
-        RegionModel={RegionModel}
-        setInfo = {setInfo}
+      
+      <BoughtTicketsList
+        showBought={showBought} 
+        list={BoughtList}
+        setList={setBoughtList} 
+        selectedTicket={selectedTicket}
+        setSelectedTicket={setSelectedTicket}
       />
 
-      {showResults &&
-      (<FlightResultList
-        resultsByTab={flightResults}
-        type={chooseType}
-        setToAndSearch={(to) => {
-          if (!methods) return;
-          setTimeout(() => {
-            methods.handleSearchWithTo(to);
-            const { from } = methods.getFromTo();
-            setBookingRoute({ from, to });
-            setTimeout(() => {
-            }, 100);
-          }, 0);
-        }}
-        bookingRoute ={bookingRoute}
-        Methods={methods}
-        setLogin={Login}
-        favorites={favorites}
-        setFavorites={setFavorites}
-        info={info}
-        setBoughtList = {setBoughtList}
-        BoughtList={BoughtList}
-      />)}
+      <Home isVisible={showHome} />
 
+
+
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showSearch ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none h-0"
+        }`}
+      >
+        <FlightSearchForm
+          onSearch={(results) => {
+            setFlightResults(results);
+            setShowHome(false);
+            setScalMenu(true);
+            setShowResults(true);
+          }}
+          ChooseType={(from, to) => {
+            let country = "Việt Nam";
+            if (RegionModel?.getCountry) {
+              country = RegionModel.getCountry();
+            }
+            setBookingRoute({ from, to });
+            if (from === country && to === country) {
+              SetChooseType(0);
+            } else if (from === country || to === country) {
+              if (from === country) SetChooseType(1);
+              else SetChooseType(2);
+            } else {
+              SetChooseType(3);
+            }
+          }}
+          exposeMethods={setMethods}
+          RegionModel={RegionModel}
+          setInfo={setInfo}
+        />
+      </div>
+
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showResults ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
+        }`}
+      >
+        <FlightResultList
+          resultsByTab={flightResults}
+          type={chooseType}
+          setToAndSearch={(to) => {
+            if (!methods) return;
+            setTimeout(() => {
+              methods.handleSearchWithTo(to);
+              const { from } = methods.getFromTo();
+              setBookingRoute({ from, to });
+            }, 0);
+          }}
+          bookingRoute={bookingRoute}
+          Methods={methods}
+          setLogin={Login}
+          favorites={favorites}
+          setFavorites={setFavorites}
+          setSelectedFlight={setSelectedFlight}
+        />
+      </div>
 
       <LoginModal 
       isOpen={isLoginOpen} 
@@ -123,6 +155,16 @@ function App() {
         isOpen={showRegionModal}
         onClose={() => setShowRegionModal(false)}
         exposeRegionModel = {setRegionModel}
+      />
+      <FlightDetailPanel
+        index={index}
+        setIndex={setIndex}
+        selectedFlight={selectedFlight}
+        onClose={() => setSelectedFlight(null)}
+        info={info}
+        setBoughtList={setBoughtList}
+        BoughtList={BoughtList}
+        setLogin={Login}
       />
     </div>
   );

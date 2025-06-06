@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin }) => {
+const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin, index, setIndex }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [visible, setVisible] = useState(!!selectedFlight);
   const [isPaying, setIsPaying] = useState(false);
@@ -11,15 +11,28 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
 
     // Giả lập hiệu ứng loading + lưu vào danh sách tạm
     setTimeout(() => {
-        // Sau khi "thanh toán xong"
         setIsPaying(false);
         setIsPaid(true);
 
-        // Tắt panel sau 1.5s
         setTimeout(() => {
         setIsPaid(false);
         handleClose();
-        setBoughtList(prev => prev.includes(selectedFlight?.id) ? prev : [...prev, selectedFlight?.id]);
+  
+        setBoughtList(prev => {
+          setIndex(index + 1)
+          return [
+            ...prev,
+            {
+              id: index,
+              flight: selectedFlight,
+              pd: passengerData,
+              date: departureDate,
+            }
+          ];
+        });
+
+
+
         }, 1500);
     }, 2000); // Thời gian giả lập xử lý thanh toán
   };
@@ -78,12 +91,12 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
 
       {/* Panel chi tiết */}
       <div
-        className={`fixed top-0 right-0 w-full md:w-[420px] h-screen rounded-l-2xl bg-white z-50 shadow-lg overflow-y-auto
+        className={`fixed top-0 right-0 w-full md:w-[420px] h-screen rounded-l-2xl bg-white z-50 shadow-lg overflow-y-auto text-black
           ${isClosing ? "animate-slide-out" : "animate-slide-in"}
         `}
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-bold">Chuyến đi của bạn</h3>
+          <h3 className="font-bold">Chuyến đi của bạn</h3>
           <button onClick={handleClose} className="text-2xl font-bold">×</button>
         </div>
 
@@ -110,19 +123,6 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
             💰 <strong>Tổng số tiền:</strong> {totalAmount.toLocaleString()} VND
             </div>
         
-            {/* {isPaying ? (
-            <div className="w-full bg-[#071d36] text-white py-2 rounded font-semibold text-center animate-pulse">Đang xử lý thanh toán...</div>
-            ) : isPaid ? (
-            <div className="w-full bg-green-500 text-white py-2 rounded font-semibold text-center animate-fade-in">✅ Thanh toán thành công!</div>
-            ) : isBought ? (
-            <div className="w-full bg-gray-300 text-white py-2 rounded font-semibold text-center cursor-not-allowed">
-                Đã thanh toán
-            </div>
-            ) : (
-            <button onClick={handlePayment} className="w-full bg-[#071d36] transform transition-all duration-200 ease-out hover:scale-105 text-white py-2 rounded font-semibold mt-4">Thanh Toán</button>
-            )} */}
-
-
             {isPaying ? (
             <div className="w-full bg-[#071d36] text-white py-2 rounded font-semibold text-center animate-pulse">
                 Đang xử lý thanh toán...
@@ -139,9 +139,6 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
                 Thanh Toán
             </button>
             )}
-
-
-
             <hr />
             <span className="text-gray-700 space-y-1" >Các điều khoảng và ưu đãi:</span>
             {/* Lợi ích */}
