@@ -29,6 +29,7 @@ function App() {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [index, setIndex] = useState(1)
+  const [user, setUser] = useState({})
 
   const setUpLogin = () => {
     if (!logined) {
@@ -46,9 +47,10 @@ function App() {
       methods.resetFlightSearchForm();   // reset lại form input
     }
   };
-
+  
   useEffect(() => {
     setLogin({
+      setUser,
       setUpLogin,
       setLogined,
       setIsLoginOpen,
@@ -56,17 +58,21 @@ function App() {
     });
   }, [logined, setLogin]);
 
+  const handleLogout = () => {
+    setLogined(false);
+    setUser(null); // hoặc setUser({}) tùy bạn
+  };
 
   return (
     <div className="min-h-screen text-white font-sans">
       <Menu 
+        ticketCount={BoughtList.length}
         switchToHome={resetToHome}
         scale_Menu={scale}
         setIsLoginOpen = {setIsLoginOpen}
         setShowRegionModal = {setShowRegionModal}
         RegionModel={RegionModel}
         methods = {methods}
-        setShowSearch = {setShowSearch}
         showSearch = {showSearch}
         hidden = {()=>{
           setShowSearch(false)
@@ -75,6 +81,9 @@ function App() {
           setShowBought(true)
         }}
         visible={resetToHome}
+        logined = {logined}
+        user={user}
+        onLogout={handleLogout}
        />
       
       <BoughtTicketsList

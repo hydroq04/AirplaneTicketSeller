@@ -96,7 +96,11 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
               </div>
                 <button
                 onClick={() => {
-                    setLogin?.setLogined?.(true);  // ✅ dùng đúng object Login
+                    setLogin?.setLogined?.(true); 
+                    setLogin?.setUser?.({
+                      name: email.split("@")[0], 
+                      email: email,
+                    });
                     onClose();
                 }}
                 disabled={!isEmailValid}
