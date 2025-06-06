@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import PassengerClassSelector from "./PassengerClassSelector";
+import PassengerClassPortal from "./PassengerClassPortal";
 
 const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSearch, showForm, setSumPassenger, departureDate, setDepartureDate, setInfo }) => {
   const [passengerData, setPassengerData] = useState({
@@ -105,8 +106,18 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
         >
           {formatPassengerText()}
 
-          {showPassengerSelector && (
-            <div className={`absolute z-[9999] left-0 ${popupPosition === "top" ? "bottom-full mb-2" : "top-full mt-2"}`}>
+        {showPassengerSelector && (
+          <PassengerClassPortal>
+            <div
+              className="absolute z-[9999]"
+              style={{
+                position: "absolute",
+                top: popupPosition === "top"
+                  ? passengerRef.current.getBoundingClientRect().top -320
+                  : passengerRef.current.getBoundingClientRect().bottom + 10,
+                left: passengerRef.current.getBoundingClientRect().left,
+              }}
+            >
               <PassengerClassSelector
                 value={passengerData}
                 onChange={(data) => setPassengerData(data)}
@@ -114,7 +125,8 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
                 position={popupPosition}
               />
             </div>
-          )}
+          </PassengerClassPortal>
+        )}
         </div>
 
         <button
