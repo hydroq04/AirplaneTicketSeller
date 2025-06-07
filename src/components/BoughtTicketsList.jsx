@@ -104,13 +104,13 @@ const handleCancelTicket = () => {
             >
                 <div>
                 <h3 className="font-semibold text-base text-blue-700">
-                    Mã vé: #{ticket.id}
+                    {ticket.flight.airline}
                 </h3>
                 <p className="text-sm text-gray-600">
                     {formattedDate} • {ticket.pd.travelClass}
                 </p>
                 </div>
-                <div className="text-sm text-right leading-tight">
+                <div className="text-sm text-black text-right leading-tight">
                 <p>{totalPassenger} hành khách</p>
                 <p className="text-xs text-gray-500">
                     {ticket.pd.adults} NL, {ticket.pd.children} TE
@@ -157,19 +157,49 @@ const handleCancelTicket = () => {
               &times;
             </button>
 
-            <h3 className="text-xl font-bold text-[#071d36] mb-3">🎟️ Mã vé: #{selectedTicket.id}</h3>
-            <div className="space-y-2 text-sm text-gray-700">
-              <p>
-                📅 Ngày khởi hành:{" "}
-                <strong>{new Date(selectedTicket.date).toLocaleDateString()}</strong>
-              </p>
-              <p>
-                🧍‍♂️ {selectedTicket.pd.adults} người lớn, {selectedTicket.pd.children} trẻ em
-              </p>
-              <p>
-                🎫 Hạng khoang: <strong>{selectedTicket.pd.travelClass}</strong>
-              </p>
-            </div>
+<h3 className="text-2xl font-bold text-[#071d36] mb-4 text-center">
+  🎟️ Vé số #{selectedTicket.id}
+</h3>
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+  <div>
+    <p className="mb-1 font-medium">✈️ Hãng bay:</p>
+    <p className="text-gray-800">{selectedTicket.flight.airline}</p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">🛫 Thời gian bay:</p>
+    <p className="text-gray-800">
+      {selectedTicket.flight.timeFrom} → {selectedTicket.flight.timeTo}
+    </p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">📍 Sân bay:</p>
+    <p className="text-gray-800">
+      {selectedTicket.flight.codeFrom} → {selectedTicket.flight.codeTo}
+    </p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">📅 Ngày khởi hành:</p>
+    <p className="text-gray-800">
+      {new Date(selectedTicket.date).toLocaleDateString()}
+    </p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">👥 Hành khách:</p>
+    <p className="text-gray-800">
+      {selectedTicket.pd.adults} người lớn, {selectedTicket.pd.children} trẻ em
+    </p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">💺 Hạng khoang:</p>
+    <p className="text-gray-800">{selectedTicket.pd.travelClass}</p>
+  </div>
+</div>
 
             {/* Nút Hủy */}
             <button

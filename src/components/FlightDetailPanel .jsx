@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 
-const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin, index, setIndex }) => {
+const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin, index, setIndex, showPanel, setShowPanel }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [visible, setVisible] = useState(!!selectedFlight);
   const [isPaying, setIsPaying] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
 
@@ -41,7 +40,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
 
   useEffect(() => {
     if (selectedFlight) {
-      setVisible(true);
+      setShowPanel(true);
       setIsClosing(false);
     }
   }, [selectedFlight]);
@@ -49,14 +48,15 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
-      setVisible(false);
+      setShowPanel(false);
       onClose();
     }, 300);
   };
-  if (!visible) return null;
+  
+  if (!showPanel) return null;
   
   if (!setLogin.isLogin()){
-    setVisible(false)
+    setShowPanel(false)
     setLogin.setIsLoginOpen(true)
     return null
   }

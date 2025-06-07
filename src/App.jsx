@@ -8,6 +8,7 @@ import RegionSettingsModal from "./pages/RegionSettingsModal";
 import BoughtTicketsList from "./components/BoughtTicketsList";
 import FlightDetailPanel from "./components/FlightDetailPanel ";
 
+
 function App() {
   const [flightResults, setFlightResults] = useState(null);
   const [showHome, setShowHome] = useState(true);
@@ -30,6 +31,8 @@ function App() {
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [index, setIndex] = useState(1)
   const [user, setUser] = useState({})
+  const [showForm, setShowForm] = useState(true);
+  const [showPanel, setShowPanel] = useState(false)
 
   const setUpLogin = () => {
     if (!logined) {
@@ -64,73 +67,83 @@ function App() {
   };
 
   return (
+    
     <div className="min-h-screen text-white font-sans">
-      <Menu 
-        ticketCount={BoughtList.length}
-        switchToHome={resetToHome}
-        scale_Menu={scale}
-        setIsLoginOpen = {setIsLoginOpen}
-        setShowRegionModal = {setShowRegionModal}
-        RegionModel={RegionModel}
-        methods = {methods}
-        showSearch = {showSearch}
-        hidden = {()=>{
-          setShowSearch(false)
-          setShowResults(false)
-          setShowHome(false)
-          setShowBought(true)
-        }}
-        visible={resetToHome}
-        logined = {logined}
-        user={user}
-        onLogout={handleLogout}
-       />
-      
-      <BoughtTicketsList
-        showBought={showBought} 
-        list={BoughtList}
-        setList={setBoughtList} 
-        selectedTicket={selectedTicket}
-        setSelectedTicket={setSelectedTicket}
-      />
-
-      <Home isVisible={showHome} />
-
-
-
-      <div
-        className={`transition-all duration-500 ease-in-out transform ${
-          showSearch ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none h-0"
-        }`}
-      >
-        <FlightSearchForm
-          onSearch={(results) => {
-            setFlightResults(results);
-            setShowHome(false);
-            setScalMenu(true);
-            setShowResults(true);
-          }}
-          ChooseType={(from, to) => {
-            let country = "Việt Nam";
-            if (RegionModel?.getCountry) {
-              country = RegionModel.getCountry();
-            }
-            setBookingRoute({ from, to });
-            if (from === country && to === country) {
-              SetChooseType(0);
-            } else if (from === country || to === country) {
-              if (from === country) SetChooseType(1);
-              else SetChooseType(2);
-            } else {
-              SetChooseType(3);
-            }
-          }}
-          exposeMethods={setMethods}
-          RegionModel={RegionModel}
-          setInfo={setInfo}
+      {showForm && !showHome && !showBought && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 transition-opacity duration-300"
+          onClick={() => setShowForm(false)}
         />
-      </div>
+      )}
+      <div  className={`${(showHome || showPanel)?"":"fixed top-0 left-0 w-full z-50 bg-[#071d36]"}`} >
+          <Menu 
+            ticketCount={BoughtList.length}
+            switchToHome={resetToHome}
+            scale_Menu={scale}
+            setIsLoginOpen = {setIsLoginOpen}
+            setShowRegionModal = {setShowRegionModal}
+            RegionModel={RegionModel}
+            methods = {methods}
+            showSearch = {showSearch}
+            hidden = {()=>{
+              setShowSearch(false)
+              setShowResults(false)
+              setShowHome(false)
+              setShowBought(true)
+            }}
+            visible={resetToHome}
+            logined = {logined}
+            user={user}
+            onLogout={handleLogout}
+          />
+          
+          <BoughtTicketsList
+            showBought={showBought} 
+            list={BoughtList}
+            setList={setBoughtList} 
+            selectedTicket={selectedTicket}
+            setSelectedTicket={setSelectedTicket}
+          />
 
+          <Home isVisible={showHome} />
+          <div
+            className={`transition-all duration-500 ease-in-out transform ${
+              showSearch ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none h-0"
+            }`}
+          >
+            <FlightSearchForm
+              onSearch={(results) => {
+                setFlightResults(results);
+                setShowHome(false);
+                setScalMenu(true);
+                setShowResults(true);
+              }}
+              ChooseType={(from, to) => {
+                let country = "Việt Nam";
+                if (RegionModel?.getCountry) {
+                  country = RegionModel.getCountry();
+                }
+                setBookingRoute({ from, to });
+                if (from === country && to === country) {
+                  SetChooseType(0);
+                } else if (from === country || to === country) {
+                  if (from === country) SetChooseType(1);
+                  else SetChooseType(2);
+                } else {
+                  SetChooseType(3);
+                }
+              }}
+              exposeMethods={setMethods}
+              RegionModel={RegionModel}
+              setInfo={setInfo}
+              showBought={showBought}
+              showForm={showForm}
+              setShowForm={setShowForm}
+            />
+          </div>
+      </div>
+      {(showHome || showPanel)? (<div className="h-0"></div>):(<div className="h-[210px]" />)}
+      
       <div
         className={`transition-all duration-500 ease-in-out transform ${
           showResults ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
@@ -165,7 +178,10 @@ function App() {
         onClose={() => setShowRegionModal(false)}
         exposeRegionModel = {setRegionModel}
       />
+      
       <FlightDetailPanel
+        showPanel = {showPanel}
+        setShowPanel = {setShowPanel}
         index={index}
         setIndex={setIndex}
         selectedFlight={selectedFlight}
