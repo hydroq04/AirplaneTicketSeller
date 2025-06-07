@@ -13,6 +13,17 @@ const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount }) => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+    // Simulate role fetch from local storage
+  useEffect(() => {
+    const simulatedToken = localStorage.getItem('token');
+    if (simulatedToken) {
+      const simulatedRole = simulatedToken.includes('admin') ? 'admin' : 'user';
+      setRole(simulatedRole);
+    } else {
+      setRole('user');
+    }
+  }, []);
+  
 
   const hideWithAnimation = () => {
     setIsVisible(false);
@@ -57,6 +68,14 @@ const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount }) => {
         <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg px-4 py-2 text-sm text-gray-800 mb-4">
           🧾 Bạn đã đặt <strong>{ticketCount}</strong> vé
         </div>
+
+        {/* Admin-specific options */}
+        {role === 'admin' && (
+          <div className="mb-4">
+            <a href="/#revenue" className="block text-blue-600 hover:underline mb-1">📊 Revenue Report</a>
+            <a href="/#flights" className="block text-blue-600 hover:underline">✈️ Flight Details</a>
+          </div>
+        )}
 
         <button
           onClick={() => {
