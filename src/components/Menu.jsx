@@ -4,6 +4,7 @@ import AccountInfoPopup from "./AccountInfoPopup";
 const Menu = ({setIsLoginOpen, setShowRegionModal, user, ticketCount ,RegionModel, switchToHome, showSearch, hidden, visible, logined, avatarUrl = "https://i.pravatar.cc", onLogout }) => {
     if (!RegionModel) return;
     const [showAccountPopup, setShowAccountPopup] = useState(false);
+    const [role, setRole] = useState(null);
 
     const { language, country, currency } = RegionModel.getLCC();
     const convert_country = (country) => {
@@ -13,7 +14,16 @@ const Menu = ({setIsLoginOpen, setShowRegionModal, user, ticketCount ,RegionMode
           return "USA"
       return "ex"
     }
-
+  // Vai trò fetch từ bộ nhớ local
+  useEffect(() => {
+    const simulatedToken = localStorage.getItem('token');
+    if (simulatedToken) {
+      const simulatedRole = simulatedToken.includes('admin') ? 'admin' : 'user';
+      setRole(simulatedRole);
+    } else {
+      setRole('user');
+    }
+  }, [logined]); // Chạy lại khi trang thái đăng nhập thay đổi.
   return (
     <section className="flex justify-between items-center px-6 py-4 bg-[#071d36] shadow-md">
       <div className="flex flex-wrap gap-2 max-w-[400px]">
@@ -77,7 +87,14 @@ const Menu = ({setIsLoginOpen, setShowRegionModal, user, ticketCount ,RegionMode
               ticketCount={ticketCount}
               onClose={() => setShowAccountPopup(false)}
               onLogout={onLogout}
-            />
+            >
+              {role === 'admin' && (
+                <div className="mt-2">
+                  <a href="/#revenue" className="block text-blue-400 hover:underline">Revenue Report</a>
+                  <a href="/#flights" className="block text-blue-400 hover:underline mt-1">Flight Details</a>
+                </div>
+                )}
+            </AccountInfoPopup>
           )}
         </div>
 
