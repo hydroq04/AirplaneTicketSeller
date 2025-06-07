@@ -5,6 +5,13 @@ const PassengerClassSelector = ({ value, onChange, onClose, position = "top" }) 
   const [children, setChildren] = useState(value?.children || 0);
   const [travelClass, setTravelClass] = useState(value?.travelClass || "Phổ thông");
   const [isVisible, setIsVisible] = useState(true);
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState("user");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const ref = useRef();
 
@@ -19,6 +26,43 @@ const PassengerClassSelector = ({ value, onChange, onClose, position = "top" }) 
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+   // Vai trò Fetch
+  useEffect(() => {
+    const simulateRoleFetch = async () => {
+      try {
+        const simulatedToken = localStorage.getItem('token');
+        if (simulatedToken) {
+          const simulatedRole = simulatedToken.includes('admin') ? 'admin' : 'user';
+          setRole(simulatedRole);
+        } else {
+          setRole('user');
+        }
+      } catch (err) {
+        setError('Failed to load role information');
+      } finally {
+        setLoading(false);
+      }
+    };
+    simulateRoleFetch();
+  }, []);
+
+  // Xử lý đăng ký
+  const handleRegister = (e) => {
+    e.preventDefault();
+    try {
+      const userData = { username, email, password, role: selectedRole };
+      console.log('Registration data:', userData);
+      localStorage.setItem('token', selectedRole === 'admin' ? 'admin-token' : 'user-token');
+      setRole(selectedRole);
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setError(null);
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+    }
+  };
+
   // Animate hide
   const hideWithAnimation = () => {
     setIsVisible(false);
@@ -31,6 +75,9 @@ const PassengerClassSelector = ({ value, onChange, onClose, position = "top" }) 
   useEffect(() => {
     onChange?.({ adults, children, travelClass });
   }, [adults, children, travelClass]);
+
+  if (loading) return <div className="text-center p-4">Loading...</div>;
+  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
     <div
@@ -51,6 +98,56 @@ const PassengerClassSelector = ({ value, onChange, onClose, position = "top" }) 
       />
 
       {/* Nội dung chọn */}
+      <div>
+        {role === 'admin' ? (
+          <div>
+            <h1 className="text-2xl font-bold mb-4 text-gray-800">Admin Dashboard</h1>
+            <form onSubmit={handleRegister} className="bg-white p-6 rounded-lg shadow-md mb-6">
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                className="border p-2 mb-2 w-full rounded"
+                required
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="border p-2 mb-2 w-full rounded"
+                required
+              />
+              <input
+             
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="border p-2 mb-2 w-full rounded"
+                required
+              />
+              <select
+                value={selectedRole}
+                onChange={(e)  => setSelectedRole(e.target.value)}
+                className="border p-2 mb-2 w-full rounded"
+                required
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
+              >
+                Register
+              </button>
+            </form>
+            <RevenueReport />
+            <FlightDetails />
+          </div>
+     ) : (
       <div>
         {/* Chọn hạng khoang */}
         <div className="mb-4">
@@ -110,6 +207,100 @@ const PassengerClassSelector = ({ value, onChange, onClose, position = "top" }) 
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+// Thành phần đặc thù cho admin
+const RevenueReport = () => {
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const simulateRevenueFetch = async () => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const simulatedReport = {
+          totalRevenue: 500000,
+          monthlyBreakdown: { June: 150000, May: 350000 },
+        };
+        setReport(simulatedReport);
+      } catch (err) {
+        setError('Failed to load revenue report');
+      } finally {
+        setLoading(false);
+      }
+    };
+    simulateRevenueFetch();
+  }, []);
+
+  if (loading) return <div className="text-center p-4">Loading revenue data...</div>;
+  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+
+  return (
+    <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-2 text-gray-800">Revenue Report</h2>
+      {report && (
+        <div className="text-gray-600">
+          <p>Total Revenue: ${report.totalRevenue}</p>
+          <p>June: ${report.monthlyBreakdown.June}</p>
+          <p>May: ${report.monthlyBreakdown.May}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FlightDetails = () => {
+  const [flights, setFlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const simulateFlightFetch = async () => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const simulatedFlights = [
+          {
+            id: 'FL001',
+            passengerCount: 150,
+            passengerInfo: { avgAge: 35, classDistribution: { Economy: 120, Business: 30 } },
+          },
+          {
+            id: 'FL002',
+            passengerCount: 200,
+            passengerInfo: { avgAge: 40, classDistribution: { Economy: 160, Business: 40 } },
+          },
+        ];
+        setFlights(simulatedFlights);
+      } catch (err) {
+        setError('Failed to load flight details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    simulateFlightFetch();
+  }, []);
+
+  if (loading) return <div className="text-center p-4">Loading flight data...</div>;
+  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+
+  return (
+    <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-2 text-gray-800">Flight Details</h2>
+      {flights.length > 0 ? (
+        <ul className="text-gray-600">
+          {flights.map((flight) => (
+            <li key={flight.id} className="border-b py-2">
+              <p>Flight ID: {flight.id}</p>
+              <p>Passengers: {flight.passengerCount}</p>
+              <p>Passenger Info: {JSON.stringify(flight.passengerInfo)}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-600">No flight data available</p>
+      )}
     </div>
   );
 };
