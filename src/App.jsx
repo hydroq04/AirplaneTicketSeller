@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import Menu from "./components/Menu";
 import Home from "./pages/Home";
 import FlightSearchForm from "./components/FlightSearchForm";
@@ -7,6 +7,9 @@ import LoginModal from "./pages/LoginModal";
 import RegionSettingsModal from "./pages/RegionSettingsModal";
 import BoughtTicketsList from "./components/BoughtTicketsList";
 import FlightDetailPanel from "./components/FlightDetailPanel ";
+import RevenueReport from "./pages/RevenueReport";
+import FlightListAdmin from "./pages/FlightListAdmin";
+import CustomerListAdmin from "./pages/CustomerListAdmin";
 
 
 function App() {
@@ -32,7 +35,12 @@ function App() {
   const [index, setIndex] = useState(1)
   const [user, setUser] = useState({})
   const [showForm, setShowForm] = useState(true);
-  const [showPanel, setShowPanel] = useState(false)
+  const [showPanel, setShowPanel] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [showReportPage, setShowReportPage] = useState(false);
+  const [showFlightListAdmin, setShowFlightListAdmin] = useState(false)
+  const [showCustomerListAdmin, setShowCustomerListAdmin] = useState(false)
+  
 
   const setUpLogin = () => {
     if (!logined) {
@@ -50,38 +58,58 @@ function App() {
       methods.resetFlightSearchForm();   // reset lại form input
     }
   };
-  
+
+const Homeadmin = () => {
+  setShowHome(true);
+  setShowSearch(false);
+  setShowResults(false);
+  setShowBought(false);
+  setShowForm(false);
+  setShowPanel(false);
+  setIsAdmin(true);
+  setShowReportPage(false)
+  setShowFlightListAdmin(false)
+};
+
   useEffect(() => {
     setLogin({
       setUser,
       setUpLogin,
       setLogined,
       setIsLoginOpen,
+      resetToHome,
+      setShowResults,
+      setIsAdmin,
+      setShowHome,
+      setBoughtList,
+      setShowSearch,
+      Homeadmin,
       isLogin: () => logined
     });
   }, [logined, setLogin]);
 
   const handleLogout = () => {
     setLogined(false);
-    setUser(null); // hoặc setUser({}) tùy bạn
+    setUser(null);
   };
 
   return (
-    
     <div className="min-h-screen text-white font-sans">
-      {showForm && !showHome && !showBought && (
+      {showForm && !showHome && !showBought && isAdmin && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 transition-opacity duration-300"
           onClick={() => setShowForm(false)}
         />
       )}
-      <div  className={`${(showHome || showPanel)?"":"fixed top-0 left-0 w-full z-50 bg-[#071d36]"}`} >
+      <div  className={`${(showHome || showPanel ||  showReportPage)?"":"fixed top-0 left-0 w-full z-50 bg-[#071d36]"}`} >
           <Menu 
             ticketCount={BoughtList.length}
             switchToHome={resetToHome}
+            switchToHomeAdmin={Homeadmin}
             scale_Menu={scale}
             setIsLoginOpen = {setIsLoginOpen}
             setShowRegionModal = {setShowRegionModal}
+            setLogin={Login}
             RegionModel={RegionModel}
             methods = {methods}
             showSearch = {showSearch}
@@ -95,6 +123,9 @@ function App() {
             logined = {logined}
             user={user}
             onLogout={handleLogout}
+            setShowReportPage={setShowReportPage}
+            setShowFlightListAdmin={setShowFlightListAdmin}
+            setShowCustomerListAdmin = {setShowCustomerListAdmin}
           />
           
           <BoughtTicketsList
@@ -136,6 +167,7 @@ function App() {
               exposeMethods={setMethods}
               RegionModel={RegionModel}
               setInfo={setInfo}
+              isAdmin = {isAdmin}
               showBought={showBought}
               showForm={showForm}
               setShowForm={setShowForm}
@@ -191,6 +223,28 @@ function App() {
         BoughtList={BoughtList}
         setLogin={Login}
       />
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showReportPage ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
+        }`} 
+      >
+        <RevenueReport />
+      </div>
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showFlightListAdmin ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
+        }`} 
+      >
+        <FlightListAdmin />
+      </div>
+
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showCustomerListAdmin ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
+        }`} 
+      >
+        <CustomerListAdmin />
+      </div>
     </div>
   );
 }

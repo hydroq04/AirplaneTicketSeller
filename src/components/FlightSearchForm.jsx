@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import FlightSearchFormFull from "./FlightSearchFormFull";
 import FlightSearchBarCompact from "./FlightSearchBarCompact";
 
-const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel, setInfo, showBought, showForm, setShowForm}) => {
+const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel, setInfo, showBought, showForm, setShowForm, isAdmin}) => {
   const [from, setFrom] = useState("Việt Nam");
   const [to, setTo] = useState("TP.HCM");
   const [position, setPosition] = useState(-300);
@@ -109,10 +109,10 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel, se
     }
   }, [from, to]);
   useEffect(() => {
-  if (showBought) {
+  if (showBought || isAdmin) {
     setPosition(-999);
   }
-}, [showBought]);
+}, [showBought, isAdmin]);
 
   const handleSwap = () => {
     setFrom(to);

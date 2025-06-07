@@ -54,6 +54,9 @@ const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount }) => {
         <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-800 mb-2 break-words">
           🏦 Ngân hàng: <strong>{user.bankInfo || "Chưa khai báo"}</strong>
         </div>
+        <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-800 mb-2 break-words">
+          🧾 Vai trò: <strong>{user.role}</strong>
+        </div>
         <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg px-4 py-2 text-sm text-gray-800 mb-4">
           🧾 Bạn đã đặt <strong>{ticketCount}</strong> vé
         </div>
