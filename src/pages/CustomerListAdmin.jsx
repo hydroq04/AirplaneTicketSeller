@@ -2,6 +2,18 @@ import React, { useState } from "react";
 import { Pencil, Trash2, Eye, PlusCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+
+const initialFlights = [
+  { id: "#01", airline: "Vietjet Air", timeFrom: "21:05", timeTo: "22:05", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 42 },
+  { id: "#02", airline: "Vietnam Airlines", timeFrom: "18:40", timeTo: "19:45", codeFrom: "SGN", codeTo: "CXR", duration: "1g 05", type: "Trực tiếp", price: 2551000, passengerCount: 65 },
+  { id: "#03", airline: "Vietjet Air", timeFrom: "05:30", timeTo: "06:30", codeFrom: "CXR", codeTo: "SGN", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 38 },
+  { id: "#04", airline: "Vietnam Airlines", timeFrom: "08:55", timeTo: "10:00", codeFrom: "SGN", codeTo: "CXR", duration: "1g 05", type: "Trực tiếp", price: 3296000, passengerCount: 78 },
+  { id: "#05", airline: "Vietjet Air", timeFrom: "12:40", timeTo: "13:40", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 2489539, passengerCount: 50 },
+  { id: "#06", airline: "Vietjet Air", timeFrom: "21:05", timeTo: "22:05", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 44 },
+  { id: "#07", airline: "Vietnam Airlines", timeFrom: "18:40", timeTo: "19:45", codeFrom: "CXR", codeTo: "SGN", duration: "1g 05", type: "Trực tiếp", price: 2551000, passengerCount: 61 },
+  { id: "#08", airline: "Vietnam Airlines", timeFrom: "18:40", timeTo: "19:45", codeFrom: "SGN", codeTo: "CXR", duration: "1g 05", type: "Trực tiếp", price: 3296000, passengerCount: 75 }
+];
+
 const initialCustomers = [
   {
     email: "alice@example.com",
@@ -10,7 +22,14 @@ const initialCustomers = [
     dob: "2000-01-01",
     address: "Hà Nội",
     bankInfo: "VCB - 123456789",
-    tickets: 3,
+    tickets: [{id: 1, 
+      flight: initialFlights[1] , 
+      date: "2025-06-10",
+      pd: {
+        adults: 2,
+        children: 1,
+        travelClass: "Economy"
+      }}],
   },
   {
     email: "alex@alpha.com",
@@ -19,7 +38,7 @@ const initialCustomers = [
     dob: "1999-08-20",
     address: "Nam Định",
     bankInfo: "MB - 222333444",
-    tickets: 2,
+    tickets: [],
   },
   {
     email: "amanda@flower.com",
@@ -28,7 +47,7 @@ const initialCustomers = [
     dob: "2001-02-14",
     address: "Quảng Nam",
     bankInfo: "ACB - 111222333",
-    tickets: 1,
+    tickets: [],
   },
   {
     email: "bob@example.com",
@@ -37,7 +56,7 @@ const initialCustomers = [
     dob: "1995-05-10",
     address: "TP.HCM",
     bankInfo: "TCB - 987654321",
-    tickets: 1,
+    tickets: [],
   },
   {
     email: "brian@beta.com",
@@ -46,7 +65,7 @@ const initialCustomers = [
     dob: "1994-04-22",
     address: "Long An",
     bankInfo: "VCB - 444555666",
-    tickets: 3,
+    tickets: [],
   },
   {
     email: "bella@beauty.vn",
@@ -55,7 +74,7 @@ const initialCustomers = [
     dob: "1997-07-07",
     address: "Vĩnh Long",
     bankInfo: "BIDV - 999888777",
-    tickets: 2,
+    tickets: [],
   },
   {
     email: "charlie@domain.com",
@@ -64,7 +83,7 @@ const initialCustomers = [
     dob: "1997-03-15",
     address: "Đà Nẵng",
     bankInfo: "ACB - 654321987",
-    tickets: 2,
+    tickets: [],
   },
   {
     email: "chloe@cloud.com",
@@ -73,7 +92,7 @@ const initialCustomers = [
     dob: "2002-12-01",
     address: "Đồng Nai",
     bankInfo: "Techcombank - 1122338899",
-    tickets: 4,
+    tickets: [],
   },
   {
     email: "catherine@cafe.vn",
@@ -82,7 +101,7 @@ const initialCustomers = [
     dob: "1996-10-10",
     address: "Bình Định",
     bankInfo: "Sacombank - 5566778899",
-    tickets: 5,
+    tickets: [],
   },
   {
     email: "david@dev.com",
@@ -91,12 +110,12 @@ const initialCustomers = [
     dob: "1992-06-06",
     address: "Hà Nam",
     bankInfo: "Agribank - 1010101010",
-    tickets: 1,
+    tickets: [],
   },
 ];
 
 
-const CustomerListAdmin = () => {
+const CustomerListAdmin = ({setShowCustomerListAdmin,  setBoughtList, setShowBought}) => {
   const [customers, setCustomers] = useState(initialCustomers);
   const [editingEmail, setEditingEmail] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -110,7 +129,7 @@ const CustomerListAdmin = () => {
     dob: "",
     address: "",
     bankInfo: "",
-    tickets: 0,
+    tickets: [],
   });
 
   const handleAdd = () => {
@@ -123,7 +142,7 @@ const CustomerListAdmin = () => {
       dob: "",
       address: "",
       bankInfo: "",
-      tickets: 0,
+      tickets: [],
     });
     setShowForm(false);
   };
@@ -249,7 +268,7 @@ const CustomerListAdmin = () => {
                   </td>
                 ))}
                 <td className="px-4 py-2 text-center font-semibold text-blue-600">
-                  {c.tickets}
+                  {c.tickets.length}
                 </td>
                 <td className="px-4 py-2 space-x-2">
                   {editingEmail === c.email ? (
@@ -274,7 +293,11 @@ const CustomerListAdmin = () => {
                     <Trash2 className="w-4 h-4 inline" />
                   </button>
                   <button
-                    onClick={() => alert("Xem chi tiết khách hàng")}
+                    onClick={() => {
+                       setShowCustomerListAdmin(false)
+                       setBoughtList(c.tickets)
+                       setShowBought(true)
+                    }}
                     className="text-indigo-600 hover:text-indigo-800"
                   >
                     <Eye className="w-4 h-4 inline" />

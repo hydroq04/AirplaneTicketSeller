@@ -18,8 +18,10 @@ const Menu = ({
   setShowReportPage,
   setLogin,
   setShowFlightListAdmin,
-  setActiveTab,
-  setShowCustomerListAdmin
+
+  setShowCustomerListAdmin, 
+  showBought,
+  setShowBought
 }) => {
   if (!RegionModel) return null;
   const [showAccountPopup, setShowAccountPopup] = useState(false);
@@ -88,7 +90,7 @@ const Menu = ({
                     setShowReportPage?.(true); // gọi mở báo cáo
                     setShowFlightListAdmin?.(false)
                     setShowCustomerListAdmin?.(false)
-                    setActiveTab("revenue")
+                    setShowBought(false)
                   }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showReport ? "bg-blue-500 text-white" : "border border-white text-white"
@@ -103,7 +105,7 @@ const Menu = ({
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(false)
                   setShowFlightListAdmin?.(true)
-                  setActiveTab("flights")
+                  setShowBought(false)
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showListFlight ? "bg-blue-500 text-white" : "border border-white text-white"
@@ -118,10 +120,10 @@ const Menu = ({
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(true)
                   setShowFlightListAdmin?.(false)
-                  setActiveTab("flights")
+                  setShowBought(false)
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
-                  showInfoPassenger ? "bg-blue-500 text-white" : "border border-white text-white"
+                  (showInfoPassenger && !showBought) ? "bg-blue-500 text-white" : "border border-white text-white"
                 }`}
               >
                 Thông tin khách hàng
