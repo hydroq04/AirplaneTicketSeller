@@ -28,8 +28,17 @@ const initialCustomers = [
       pd: {
         adults: 2,
         children: 1,
-        travelClass: "Economy"
-      }}],
+        travelClass: "Phổ thông"
+      }}, 
+      {id: 2, 
+      flight: initialFlights[3] , 
+      date: "2025-06-10",
+      pd: {
+        adults: 2,
+        children: 1,
+        travelClass: "Phổ thông"
+      }
+      }],
   },
   {
     email: "alex@alpha.com",
