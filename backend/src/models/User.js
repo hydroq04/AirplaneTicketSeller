@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   },
   lastName: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   email: {
@@ -26,13 +26,25 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['customer', 'staff', 'admin'],
-    default: 'customer'
+    enum: ['user', 'staff', 'admin'],
+    default: 'user'
   },
   phone: {
     type: String,
     trim: true
-  }
+  },
+  dob: {
+    type: Date,
+    required: true
+  },
+  address: {
+    type: String,
+    trim: true
+  },
+  bankInfo: {
+    type: String,
+    trim: true
+  },
 }, {
   timestamps: true
 });
