@@ -13,9 +13,9 @@ To build this website, go to **Command Prompt** or **Powershell** and run this
 echo Build the website UI
 cd frontend
 npm run build
-move dist ../backend
 
 echo Move the built website to backend folder
+move dist ../backend
 cd ../backend
 ren dist frontend
 
