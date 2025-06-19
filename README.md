@@ -1,6 +1,8 @@
 # AirplaneTicketSeller
 This is our final project of Introduction to Software Engineering (HCMUS - 2025), built using React, Vite, JavaScript and MongoDB.
 
+Install all depandencies inside each part beforehand.
+
 To build this website, go to **Command Prompt** or **Powershell** and run this
 
 **In Windows Command Prompt/Powershell:**
