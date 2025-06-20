@@ -4,9 +4,6 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
-// .env config
-dotenv.config();
-
 // Import models
 const User = require('./models/User');
 const Flight = require('./models/Flight');
@@ -18,6 +15,9 @@ const Report = require('./models/Report');
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Use config from .env
+dotenv.config();
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
