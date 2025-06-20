@@ -7,7 +7,9 @@ const Ticket = require('./src/models/Ticket'); // Import mới
 const Payment = require('./src/models/Payment'); // Import mới
 const Report = require('./src/models/Report'); // Import mới
 
-dotenv.config({ path: './.env' });
+// .env Config
+// Change path using dotenv.config({ path: <PATH> }); if needed
+dotenv.config();
 
 const connectDB = async () => {
   try {
