@@ -17,7 +17,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Use config from .env
-dotenv.config();
+// Change config path if needed
+dotenv.config({ path: '../.env' });
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
