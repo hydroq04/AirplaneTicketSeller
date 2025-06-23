@@ -22,15 +22,14 @@ const FlightResultList = ({ resultsByTab, type, setToAndSearch, bookingRoute, Me
         />
       );
     case 3:
-      const { from, to } = bookingRoute;
+      // const { from, to, departureDate } = bookingRoute;
       return (
         <FlightBookingList
-          from={from}
-          to={to}
           setLogin = {setLogin}
           favorites={favorites}
           setFavorites={setFavorites}
           setSelectedFlight ={setSelectedFlight}
+          bookingRoute = {bookingRoute}
         />
       );
     default:

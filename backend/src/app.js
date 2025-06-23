@@ -14,13 +14,21 @@ const Report = require('./models/Report');
 
 // Initialize Express app
 const app = express();
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:5173',  // đúng port frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+
 const PORT = process.env.PORT || 3000;
 
 // Use config from .env
-dotenv.config();
+dotenv.config({ path: '../.env' });
 
+const uri = process.env.MONGO_URI;
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -69,10 +77,13 @@ app.post('/api/users/login', async (req, res) => {
       success: true, 
       user: {
         id: user._id,
-        firstName: user.firstName,
+        name: user.firstName,
         lastName: user.lastName,
+        address: user.address,
         email: user.email,
-        role: user.role
+        role: user.role,
+        bankInfo: user.bankInfo,
+        dob: user.dob
       }
     });
   } catch (error) {
@@ -94,27 +105,35 @@ app.get('/api/flights', async (req, res) => {
 app.get('/api/flights/search', async (req, res) => {
   try {
     const { origin, destination, date } = req.query;
-    
+
     let query = {};
-    if (origin) query.origin = origin;
-    if (destination) query.destination = destination;
+    if (origin) query.codeFrom = origin;
+    if (destination) query.codeTo = destination;
+
     if (date) {
-      const searchDate = new Date(date);
-      const nextDay = new Date(searchDate);
-      nextDay.setDate(nextDay.getDate() + 1);
-      
-      query.departureTime = {
-        $gte: searchDate,
-        $lt: nextDay
-      };
+      const [day, month, year] = date.split('/');
+      if (!day || !month || !year) {
+        return res.status(400).json({ message: 'Sai định dạng ngày. Đúng: dd/MM/yyyy' });
+      }
+
+      const keyword = `${day} ${getMonthName(month)} ${year}`; // "30 Jun 2025"
+      query.timeFrom = { $regex: new RegExp(keyword) };
     }
-    
+
     const flights = await Flight.find(query);
     res.json(flights);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Hàm hỗ trợ đổi "06" → "Jun"
+function getMonthName(mm) {
+  return [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ][parseInt(mm, 10) - 1];
+}
 
 // Create booking
 app.post('/api/bookings', async (req, res) => {

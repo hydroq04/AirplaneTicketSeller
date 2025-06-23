@@ -78,28 +78,73 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
         return;
       }
 
-      const newUser = { email, password, name, age, dob, address, bankInfo, role: "user" };
-      setUserList([...userList, newUser]);
+    const newUser = { 
+      email, 
+      password, 
+      firstName: name, 
+      lastName: "",
+      age, 
+      dob, 
+      address, 
+      bankInfo
+    };
 
-      setLogin?.setLogined?.(true);
-      setLogin?.setUser?.(newUser);
-      onClose(); // không reset gì cả cho user
+    fetch('http://localhost:3000/api/users/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newUser),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Đăng ký thành công, ID:', data.userId);
+          newUser._id = data.userId; // lưu thêm ID từ server
+          // setUserList(prevList => [...prevList, newUser]);
+          setLogin?.setLogined?.(true);
+          setLogin?.setUser?.(newUser);
+          onClose();
+        } else {
+          setError("Lỗi đăng ký: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Lỗi mạng hoặc server:', error);
+        setError("Không thể kết nối tới server.");
+      });
+      // setLogin?.setLogined?.(true);
+      // setLogin?.setUser?.(newUser);
+      // onClose(); // không reset gì cả cho user
     } else {
-      const foundUser = userList.find(user => user.email === email && user.password === password);
-      if (!foundUser) {
-        setError("Không tìm thấy tài khoản. Vui lòng đăng ký.");
-        return;
-      }
-
-      setLogin?.setLogined?.(true);
-      setLogin?.setUser?.(foundUser);
-
-      if (foundUser.role === "admin") {
+      // const foundUser = userList.find(user => user.email === email && user.password === password);
+      // if (!foundUser) {
+      //   setError("Không tìm thấy tài khoản. Vui lòng đăng ký.");
+      //   return;
+      // }
+      fetch ('http://localhost:3000/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({email, password})
+      })
+      .then(res => res.json())
+      .then(data=> {
+        if (!data.success){
+          setError("Email hoặc mật khẩu không đúng.")
+          return
+        }
+        const foundUser = data.user
+        console.log(foundUser)
+        setLogin?.setLogined?.(true);
+        setLogin?.setUser?.(foundUser);
+        if (foundUser.role === "admin") {
         // setLogin?.resetToHome?.();         // chuyển về home
-        setLogin?.Homeadmin?.();    // ẩn home
-      }
-
+            setLogin?.Homeadmin?.();    // ẩn home
+        }
       onClose();
+      })
     }
   };
 

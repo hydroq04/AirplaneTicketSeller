@@ -19,7 +19,9 @@ const Menu = ({
   setLogin,
   setShowFlightListAdmin,
   setActiveTab,
-  setShowCustomerListAdmin
+  setShowCustomerListAdmin,
+  setShowForm,
+  setIsAdmin
 }) => {
   if (!RegionModel) return null;
   const [showAccountPopup, setShowAccountPopup] = useState(false);
@@ -168,6 +170,8 @@ const Menu = ({
               ticketCount={ticketCount}
               onClose={() => setShowAccountPopup(false)}
               onLogout={onLogout}
+                switchToHome= {switchToHome}
+                setIsAdmin = {setIsAdmin}
             />
           )}
         </div>

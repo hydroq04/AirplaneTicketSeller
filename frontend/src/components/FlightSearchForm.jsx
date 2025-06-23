@@ -48,7 +48,7 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel, se
           { name: "Pleiku", price: 2221024 },
           { name: "Hà Nội", price: 2292450 }
         ],
-        suggestions: [
+        suggestions: [ 
           { name: "Côn Đảo", price: 3375102 },
           { name: "Hải Phòng", price: 4043128 }
         ]
@@ -92,7 +92,7 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel, se
     setPosition(-580);
     setShowForm(false);
     onSearch(results);
-    ChooseType(currentFrom, currentTo);
+    ChooseType(currentFrom, currentTo, departureDate);
   };
 
   useEffect(() => {
@@ -101,13 +101,15 @@ const FlightSearchForm = ({ onSearch, ChooseType, exposeMethods, RegionModel, se
         handleSearch,
         setTo,
         setFrom,
+        setDepartureDate,
         handleSearchWithTo,
         handleSearchWithFrom,
         getFromTo: () => ({ from, to }),
+        getDepartureDate:() => {{departureDate}},
         resetFlightSearchForm,
       });
     }
-  }, [from, to]);
+  }, [from, to,departureDate]);
   useEffect(() => {
   if (showBought || isAdmin) {
     setPosition(-999);

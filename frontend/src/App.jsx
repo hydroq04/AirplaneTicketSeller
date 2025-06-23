@@ -69,6 +69,7 @@ const Homeadmin = () => {
   setIsAdmin(true);
   setShowReportPage(false)
   setShowFlightListAdmin(false)
+  setShowCustomerListAdmin(false)
 };
 
   useEffect(() => {
@@ -126,6 +127,8 @@ const Homeadmin = () => {
             setShowReportPage={setShowReportPage}
             setShowFlightListAdmin={setShowFlightListAdmin}
             setShowCustomerListAdmin = {setShowCustomerListAdmin}
+            setShowForm={setShowForm}
+            setIsAdmin = {setIsAdmin}
           />
           
           <BoughtTicketsList
@@ -149,12 +152,12 @@ const Homeadmin = () => {
                 setScalMenu(true);
                 setShowResults(true);
               }}
-              ChooseType={(from, to) => {
+              ChooseType={(from, to, date) => {
                 let country = "Việt Nam";
                 if (RegionModel?.getCountry) {
                   country = RegionModel.getCountry();
                 }
-                setBookingRoute({ from, to });
+                setBookingRoute({ from, to, departureDate: date });
                 if (from === country && to === country) {
                   SetChooseType(0);
                 } else if (from === country || to === country) {
@@ -189,7 +192,8 @@ const Homeadmin = () => {
             setTimeout(() => {
               methods.handleSearchWithTo(to);
               const { from } = methods.getFromTo();
-              setBookingRoute({ from, to });
+              const {departureDate} = methods.getDepartureDate();
+              setBookingRoute({ from, to, departureDate });
             }, 0);
           }}
           bookingRoute={bookingRoute}

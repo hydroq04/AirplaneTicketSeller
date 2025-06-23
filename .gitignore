@@ -1,0 +1,7 @@
+# Thư mục thường không cần push
+node_modules/
+.env
+dist/
+.vscode/
+*.log
+git_backup_temp/

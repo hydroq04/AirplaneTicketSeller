@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount }) => {
+const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount,switchToHome,setIsAdmin }) => {
   const [isVisible, setIsVisible] = useState(true);
   const ref = useRef();
 
@@ -63,8 +63,12 @@ const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount }) => {
 
         <button
           onClick={() => {
-            hideWithAnimation();
-            setTimeout(() => onLogout?.(), 200);
+            switchToHome();
+            setIsAdmin(false)
+            setTimeout(() => {
+              hideWithAnimation();       // animation ẩn
+              onLogout?.();              // gọi logout sau khi ẩn
+            }, 100); // có thể để 100ms hoặc 0ms
           }}
           className="w-full py-2 text-center rounded-lg text-red-600 hover:bg-red-50 transition font-medium text-sm"
         >

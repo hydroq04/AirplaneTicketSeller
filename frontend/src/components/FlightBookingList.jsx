@@ -1,97 +1,41 @@
 import React, { useRef, useState, useEffect } from "react";
 import FlightDetailPanel from "./FlightDetailPanel"
 
-const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, setSelectedFlight}) => {
-  const fakeFlights = [
-    {
-      id: "#01",
-      airline: "Vietjet Air",
-      timeFrom: "21:05",
-      timeTo: "22:05",
-      codeFrom: "SGN",
-      codeTo: "CXR",
-      duration: "1g",
-      type: "Trực tiếp",
-      price: 1570780,
-    },
-    {
-      id: "#02",
-      airline: "Vietnam Airlines",
-      timeFrom: "18:40",
-      timeTo: "19:45",
-      codeFrom: "SGN",
-      codeTo: "CXR",
-      duration: "1g 05",
-      type: "Trực tiếp",
-      price: 2551000,
-    },
-    {
-      id:"#03",
-      airline: "Vietjet Air",
-      timeFrom: "05:30",
-      timeTo: "06:30",
-      codeFrom: "CXR",
-      codeTo: "SGN",
-      duration: "1g",
-      type: "Trực tiếp",
-      price: 1570780,
-    },
-    {
-      id: "#04",
-      airline: "Vietnam Airlines",
-      timeFrom: "08:55",
-      timeTo: "10:00",
-      codeFrom: "SGN",
-      codeTo: "CXR",
-      duration: "1g 05",
-      type: "Trực tiếp",
-      price: 3296000,
-    },
-    {
-      id: "#05",
-      airline: "Vietjet Air",
-      timeFrom: "12:40",
-      timeTo: "13:40",
-      codeFrom: "SGN",
-      codeTo: "CXR",
-      duration: "1g",
-      type: "Trực tiếp",
-      price: 2489539,
-    },
-    {
-      id: "#06",
-      airline: "Vietjet Air",
-      timeFrom: "21:05",
-      timeTo: "22:05",
-      codeFrom: "SGN",
-      codeTo: "CXR",
-      duration: "1g",
-      type: "Trực tiếp",
-      price: 1570780,
-    },
-    {
-      id: "#07",
-      airline: "Vietnam Airlines",
-      timeFrom: "18:40",
-      timeTo: "19:45",
-      codeFrom: "CXR",
-      codeTo: "SGN",
-      duration: "1g 05",
-      type: "Trực tiếp",
-      price: 2551000,
-    },
-      {
-      id: "#08",
-      airline: "Vietnam Airlines",
-      timeFrom: "18:40",
-      timeTo: "19:45",
-      codeFrom: "SGN",
-      codeTo: "CXR",
-      duration: "1g 05",
-      type: "Trực tiếp",
-      price: 3296000,
-    }
-  ];
+const FlightBookingList = ({ setLogin, favorites, setFavorites, setSelectedFlight, bookingRoute}) => {
+  const { from, to, departureDate } = bookingRoute;
+  const [flights, setFlights] = useState([]);
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');     // 01 → 09
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+
+  useEffect(() => {
+    if (!from || !to || !departureDate) return;
+
+    const fetchFlights = async () => {
+      try {
+        const query = new URLSearchParams({
+          origin: from,
+          destination: to,
+          date: formatDate(departureDate)
+        }).toString();
+        console.log(query)
+        const response = await fetch(`http://localhost:3000/api/flights/search?${query}`);
+        const data = await response.json();
+        setFlights(data);
+      } catch (err) {
+        console.error("Lỗi khi gọi API flights:", err);
+        setFlights([]); // fallback nếu lỗi
+      }
+    };
+
+    fetchFlights();
+  }, [from, to, departureDate]);
+
 
   const [open, setOpen] = useState(true);
   const [contentHeight, setContentHeight] = useState(0);
@@ -412,7 +356,7 @@ const FlightBookingList = ({ from, to, setLogin, favorites, setFavorites, setSel
 {/* ================================== BLOCK BÊN PHẢI ======================================================= */}
         {/* Danh sách chuyến bay */}
         <div className="md:col-span-3 space-y-4">
-          {fakeFlights.map((flight, idx) => {
+          {flights.map((flight, idx) => {
             const isFavorite = favorites.includes(flight.id);
             return (
               <div
