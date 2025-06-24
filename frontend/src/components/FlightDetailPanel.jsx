@@ -10,7 +10,9 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
     const { passengerData, departureDate } = info?.getInfo?.() || {};
     console.log(passengerData)
     const seatClass = passengerData?.travelClass || "economy";
+
     try {
+      console.log(seatClass)
       const res = await fetch('http://localhost:3000/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -19,7 +21,9 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
           flightId: selectedFlight._id,
           passengerDetails: {
             email: passengerData?.email ,
-            phone: passengerData?.phone 
+            phone: passengerData?.phone ,
+            adults: passengerData?.adults,
+            children: passengerData?.children
           },
           seatClass: seatClass
         })

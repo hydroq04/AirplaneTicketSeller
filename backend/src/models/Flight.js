@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
 const flightSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    trim: true
+  },
   flightNumber: {
     type: String,
-    required: true,
-    unique: true,
     trim: true
   },
   airline: {
@@ -12,33 +14,57 @@ const flightSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  // Original fields (mapped but optional)
   origin: {
     type: String,
-    required: true,
     trim: true
   },
   destination: {
     type: String,
-    required: true,
     trim: true
   },
   departureTime: {
-    type: Date,
-    required: true
+    type: Date
   },
   arrivalTime: {
-    type: Date,
-    required: true
+    type: Date
+  },
+  // New fields from seeder.js
+  timeFrom: {
+    type: String,
+    trim: true
+  },
+  timeTo: {
+    type: String,
+    trim: true
+  },
+  codeFrom: {
+    type: String,
+    trim: true
+  },
+  codeTo: {
+    type: String,
+    trim: true
+  },
+  duration: {
+    type: String,
+    trim: true
+  },
+  type: {
+    type: String,
+    trim: true
   },
   capacity: {
     type: Number,
     required: true,
-    min: 1
+    min: 1,
+    default: 180
   },
   passengerCount: {
     type: Number,
     required: true,
-    min: 0
+    min: 0,
+    default: 0
   },
   price: {
     type: Number,
@@ -48,6 +74,7 @@ const flightSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
 
 // Method to check if seats are available
 flightSchema.methods.hasAvailableSeats = function(numSeats = 1) {

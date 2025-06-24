@@ -25,6 +25,15 @@ const ticketSchema = new mongoose.Schema({
     enum: ['Phổ thông', 'Thương gia', 'Hạng nhất'],
     default: 'Phổ thông'
   },
+  passengerType: {
+    type: String,
+    enum: ['adults', 'children'],
+    default: 'adults'
+  },
+  price: {
+    type: Number,
+    required: true
+  },
   status: {
     type: String,
     enum: ['reserved', 'confirmed', 'cancelled'],
@@ -33,6 +42,14 @@ const ticketSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Method to calculate final price based on passenger type
+ticketSchema.methods.getFinalPrice = function() {
+  if (this.passengerType === 'child') {
+    return this.price * 0.9; // 10% discount for children
+  }
+  return this.price;
+};
 
 const Ticket = mongoose.model('Ticket', ticketSchema);
 

@@ -178,6 +178,7 @@ function getMonthName(mm) {
 }
 
 // Create booking
+// Create booking
 app.post('/api/bookings', async (req, res) => {
   try {
     const { customerId, flightId, passengerDetails, seatClass } = req.body;
@@ -193,26 +194,51 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(400).json({ success: false, message: 'No seats available' });
     }
     
-    // Generate booking reference
-    const bookingReference = Math.random().toString(36).substring(2, 10).toUpperCase();
-    console.log(customerId)
-    // Create ticket
-    const ticket = new Ticket({
-      ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
-      customer: customerId,
-      flight: flightId,
-      seatNumber: 'A' + Math.floor(Math.random() * 30),
-      class: seatClass || 'Phổ thông',
-      status: 'reserved'
-    });
-    await ticket.save();
+    // Create tickets for each passenger type
+    const tickets = [];
     
-    // Create booking
+    // Create adult tickets
+    for (let i = 0; i < passengerDetails.adults; i++) {
+      const ticket = new Ticket({
+        ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
+        customer: customerId,
+        flight: flightId,
+        seatNumber: 'A' + Math.floor(Math.random() * 30),
+        class: seatClass || 'Phổ thông',
+        passengerType: 'adults',
+        price: flight.price,
+        status: 'reserved'
+      });
+      await ticket.save();
+      tickets.push(ticket._id);
+    }
+    
+    // Create child tickets
+    for (let i = 0; i < passengerDetails.children; i++) {
+      const ticket = new Ticket({
+        ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
+        customer: customerId,
+        flight: flightId,
+        seatNumber: 'C' + Math.floor(Math.random() * 30),
+        class: seatClass || 'Phổ thông',
+        passengerType: 'children',
+        price: flight.price * 0.9, // 10% discount applied
+        status: 'reserved'
+      });
+      await ticket.save();
+      tickets.push(ticket._id);
+    }
+    
+    // Calculate total amount
+    const totalAmount = (passengerDetails.adults * flight.price) + 
+                      (passengerDetails.children * flight.price * 0.9);
+    console.log(totalAmount)
+    // Create booking with all tickets
     const booking = new Booking({
-      bookingReference,
+      bookingReference: Math.random().toString(36).substring(2, 10).toUpperCase(),
       customer: customerId,
-      tickets: [ticket._id],
-      totalAmount: flight.price,
+      tickets: tickets,
+      totalAmount: totalAmount,
       status: 'pending',
       contactInfo: {
         email: passengerDetails.email,
@@ -222,10 +248,10 @@ app.post('/api/bookings', async (req, res) => {
     await booking.save();
 
     // Update flight available seats
-    await flight.bookSeats(1);
+    await flight.bookSeats(passengerDetails.adults + passengerDetails.children);
     
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       booking: {
         id: booking._id,
         bookingReference: booking.bookingReference,
