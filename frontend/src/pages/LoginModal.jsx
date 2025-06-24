@@ -140,15 +140,12 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
         setLogin?.setLogined?.(true);
         setLogin?.setUser?.(foundUser);
         if (foundUser.role === "admin") {
-        // setLogin?.resetToHome?.();         // chuyển về home
-            setLogin?.Homeadmin?.();    // ẩn home
+            setLogin?.Homeadmin?.();
         }
       onClose();
       })
     }
   };
-
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="relative w-full max-w-md bg-white rounded-2xl text-black shadow-xl overflow-hidden max-h-[90vh]">
@@ -220,7 +217,6 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
-
                 {mode === "register" && (
                   <>
                     <div>
@@ -255,7 +251,6 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
                     </div>
                   </>
                 )}
-
                 <div>
                   <label className="block text-sm font-medium mb-1">Mật khẩu</label>
                   <div className="relative">

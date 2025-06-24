@@ -17,6 +17,7 @@ const FlightSearchFormFull = ({ from, to, setFrom, setTo, handleSwap, handleSear
     const total = passengerData.adults + passengerData.children;
     return `${total} ${(total>1)?"hành khách":"người lớn"}, ${passengerData.travelClass}`;
   };
+  
   useEffect(() => {
     const total = passengerData.adults + passengerData.children;
     setSumPassenger(total);

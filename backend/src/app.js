@@ -195,14 +195,14 @@ app.post('/api/bookings', async (req, res) => {
     
     // Generate booking reference
     const bookingReference = Math.random().toString(36).substring(2, 10).toUpperCase();
-    
+    console.log(customerId)
     // Create ticket
     const ticket = new Ticket({
       ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
       customer: customerId,
       flight: flightId,
       seatNumber: 'A' + Math.floor(Math.random() * 30),
-      class: seatClass || 'economy',
+      class: seatClass || 'Phổ thông',
       status: 'reserved'
     });
     await ticket.save();
@@ -220,7 +220,7 @@ app.post('/api/bookings', async (req, res) => {
       }
     });
     await booking.save();
-    
+
     // Update flight available seats
     await flight.bookSeats(1);
     

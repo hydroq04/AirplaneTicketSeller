@@ -85,6 +85,7 @@ const Homeadmin = () => {
       setBoughtList,
       setShowSearch,
       Homeadmin,
+      getUser: () => user,
       isLogin: () => logined
     });
   }, [logined, setLogin]);
@@ -208,7 +209,9 @@ const Homeadmin = () => {
       <LoginModal 
       isOpen={isLoginOpen} 
       onClose={() => setIsLoginOpen(false)}
-      setLogin={Login} />
+      setLogin={Login} 
+      />
+
       <RegionSettingsModal
         isOpen={showRegionModal}
         onClose={() => setShowRegionModal(false)}
@@ -226,6 +229,7 @@ const Homeadmin = () => {
         setBoughtList={setBoughtList}
         BoughtList={BoughtList}
         setLogin={Login}
+        user = {user}
       />
       <div
         className={`transition-all duration-500 ease-in-out transform ${

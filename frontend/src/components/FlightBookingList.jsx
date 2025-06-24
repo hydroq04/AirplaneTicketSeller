@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import FlightDetailPanel from "./FlightDetailPanel"
 
 const FlightBookingList = ({ setLogin, favorites, setFavorites, setSelectedFlight, bookingRoute}) => {
   const { from, to, departureDate } = bookingRoute;
@@ -363,7 +362,6 @@ const FlightBookingList = ({ setLogin, favorites, setFavorites, setSelectedFligh
                 key={idx}
                 className="bg-white border rounded-xl px-6 py-4 shadow-sm hover:shadow-md transition-all flex justify-between items-center"
               >
-                {/* Nút trái tim yêu thích */}
                 <button
                   onClick={() => toggleFavorite(flight.id)}
                   className={`mr-4 w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-300

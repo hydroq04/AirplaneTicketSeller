@@ -22,8 +22,8 @@ const ticketSchema = new mongoose.Schema({
   },
   class: {
     type: String,
-    enum: ['economy', 'business', 'first'],
-    default: 'economy'
+    enum: ['Phổ thông', 'Thương gia', 'Hạng nhất'],
+    default: 'Phổ thông'
   },
   status: {
     type: String,

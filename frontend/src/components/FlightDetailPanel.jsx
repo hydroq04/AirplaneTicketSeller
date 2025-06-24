@@ -1,24 +1,41 @@
 import { useState, useEffect } from "react";
 
-const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin, index, setIndex, showPanel, setShowPanel }) => {
+const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin, index, setIndex, showPanel, setShowPanel,  }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setIsPaying(true);
+    const { passengerData, departureDate } = info?.getInfo?.() || {};
+    console.log(passengerData)
+    const seatClass = passengerData?.travelClass || "economy";
+    try {
+      const res = await fetch('http://localhost:3000/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: setLogin?.getUser?.()?.id,
+          flightId: selectedFlight._id,
+          passengerDetails: {
+            email: passengerData?.email ,
+            phone: passengerData?.phone 
+          },
+          seatClass: seatClass
+        })
+      });
 
-    // Giả lập hiệu ứng loading + lưu vào danh sách tạm
-    setTimeout(() => {
-        setIsPaying(false);
-        setIsPaid(true);
+      const data = await res.json();
 
-        setTimeout(() => {
+      if (!res.ok || !data.success) throw new Error(data.message || "Booking failed");
+
+      setIsPaying(false);
+      setIsPaid(true);
+      setTimeout(() => {
         setIsPaid(false);
         handleClose();
-  
         setBoughtList(prev => {
-          setIndex(index + 1)
+          setIndex(index + 1);
           return [
             ...prev,
             {
@@ -26,14 +43,18 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
               flight: selectedFlight,
               pd: passengerData,
               date: departureDate,
+              backendId: data.booking.id,
+              bookingRef: data.booking.bookingReference,
+              total: data.booking.totalAmount
             }
           ];
         });
-
-
-
-        }, 1500);
-    }, 2000); // Thời gian giả lập xử lý thanh toán
+      }, 1500);
+    } catch (error) {
+      console.error("Lỗi thanh toán:", error);
+      setIsPaying(false);
+      alert("Đã có lỗi xảy ra khi thanh toán. " + error.message);
+    }
   };
 
 

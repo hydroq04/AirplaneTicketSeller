@@ -35,7 +35,7 @@ const flightSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
-  availableSeats: {
+  passengerCount: {
     type: Number,
     required: true,
     min: 0
