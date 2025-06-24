@@ -15,6 +15,7 @@ const Report = require('./models/Report');
 // Initialize Express app
 const app = express();
 const cors = require('cors');
+
 app.use(cors({
   origin: 'http://localhost:5173',  // đúng port frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -24,7 +25,7 @@ app.use(cors({
 const PORT = process.env.PORT || 3000;
 
 // Use config from .env
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const uri = process.env.MONGO_URI;
 // Connect to MongoDB
@@ -106,9 +107,50 @@ app.get('/api/flights/search', async (req, res) => {
   try {
     const { origin, destination, date } = req.query;
 
+    // Location mapping (full names to airport codes)
+    const locationMap = {
+      'hồ chí minh': 'SGN',
+      'tp.hcm': 'SGN',
+      'sài gòn': 'SGN',
+      'hà nội': 'HAN',
+      'hanoi': 'HAN',
+      'đà nẵng': 'DAD',
+      'danang': 'DAD',
+      'nha trang': 'CXR',
+      'cam ranh': 'CXR',
+      'phú quốc': 'PQC',
+      'phu quoc': 'PQC',
+      'đà lạt': 'DLI',
+      'dalat': 'DLI'
+    };
+
     let query = {};
-    if (origin) query.codeFrom = origin;
-    if (destination) query.codeTo = destination;
+    
+    // Process origin parameter
+    if (origin) {
+      // Check if it's a full location name (case insensitive)
+      const normalizedOrigin = origin.toLowerCase().trim();
+      if (locationMap[normalizedOrigin]) {
+        // Use the airport code from our mapping
+        query.codeFrom = locationMap[normalizedOrigin];
+      } else {
+        // If not found in mapping, use as-is (might be a direct airport code)
+        query.codeFrom = origin;
+      }
+    }
+    
+    // Process destination parameter
+    if (destination) {
+      // Check if it's a full location name (case insensitive)
+      const normalizedDest = destination.toLowerCase().trim();
+      if (locationMap[normalizedDest]) {
+        // Use the airport code from our mapping
+        query.codeTo = locationMap[normalizedDest];
+      } else {
+        // If not found in mapping, use as-is (might be a direct airport code)
+        query.codeTo = destination;
+      }
+    }
 
     if (date) {
       const [day, month, year] = date.split('/');
