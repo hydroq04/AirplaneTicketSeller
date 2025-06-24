@@ -51,7 +51,7 @@ const flightSchema = new mongoose.Schema({
 
 // Method to check if seats are available
 flightSchema.methods.hasAvailableSeats = function(numSeats = 1) {
-  return this.availableSeats >= numSeats;
+  return (this.capacity - this.passengerCount) >= numSeats;
 };
 
 // Method to book seats
@@ -59,7 +59,7 @@ flightSchema.methods.bookSeats = function(numSeats = 1) {
   if (!this.hasAvailableSeats(numSeats)) {
     throw new Error('Not enough seats available');
   }
-  this.availableSeats -= numSeats;
+  this.passengerCount += numSeats;
   return this.save();
 };
 
