@@ -1,9 +1,47 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const BoughtTicketsList = ({ showBought, list, setList, selectedTicket, setSelectedTicket }) => {
+const BoughtTicketsList = ({ showBought,selectedTicket, setSelectedTicket, user }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [clickRect, setClickRect] = useState(null);
   const modalRef = useRef();
+  const [list, setList] = useState([])
+  useEffect(() => {
+    console.log(user)
+    const userId = user?._id || user?.id;
+    if (!showBought || !userId) return;
+
+    const fetchTickets = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/bookings/user/${userId}`);
+        if (!res.ok) throw new Error("Lỗi kết nối");
+
+        const bookings = await res.json();
+
+        const allTickets = bookings.flatMap((booking) =>
+          booking.tickets.map((ticket) => ({
+            ...ticket,
+            id: ticket._id,
+            date: booking.createdAt,
+            flight: ticket.flight,
+            pd: {
+              travelClass: ticket.class || "Phổ thông",
+              adults: ticket.passengerType === "adults" ? 1 : 0,
+              children: ticket.passengerType === "children" ? 1 : 0,
+            }
+          }))
+        );
+
+        setList(allTickets);
+      } catch (err) {
+        console.error("Lỗi khi gọi API booking:", err);
+        setList([]);
+      }
+    };
+
+    fetchTickets();
+  }, [showBought, user]);
+
+
 
   const handleCardClick = (ticket, e) => {
     const rect = e.currentTarget.getBoundingClientRect();

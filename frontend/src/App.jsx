@@ -103,7 +103,7 @@ const Homeadmin = () => {
           onClick={() => setShowForm(false)}
         />
       )}
-      <div  className={`${(showHome || showPanel ||  showReportPage)?"":"fixed top-0 left-0 w-full z-50 bg-[#071d36]"}`} >
+      <div  className={`${(showHome || showPanel ||  showReportPage || showBought)?"":"fixed top-0 left-0 w-full z-50 bg-[#071d36]"}`} >
           <Menu 
             ticketCount={BoughtList.length}
             switchToHome={resetToHome}
@@ -134,10 +134,9 @@ const Homeadmin = () => {
           
           <BoughtTicketsList
             showBought={showBought} 
-            list={BoughtList}
-            setList={setBoughtList} 
             selectedTicket={selectedTicket}
             setSelectedTicket={setSelectedTicket}
+            user={user}
           />
 
           <Home isVisible={showHome} />

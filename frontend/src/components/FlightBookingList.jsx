@@ -421,5 +421,4 @@ const FlightBookingList = ({ setLogin, favorites, setFavorites, setSelectedFligh
     </div>
   );
 };
-
 export default FlightBookingList;
