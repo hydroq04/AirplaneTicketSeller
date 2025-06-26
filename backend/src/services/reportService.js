@@ -1,6 +1,7 @@
 const Report = require('../models/Report');
 const Booking = require('../models/Booking');
 const Flight = require('../models/Flight');
+const Ticket = require('../models/Ticket');
 
 // Generate monthly report
 exports.generateMonthlyReport = async (month, year, userId) => {
@@ -195,3 +196,83 @@ exports.getReports = async (filters = {}) => {
     throw new Error(`Error fetching reports: ${error.message}`);
   }
 };
+
+exports.generateMonthlyRevenueReport = async (month, year) => {
+  try {
+    // Define the date range for the month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+    
+    // Find all flights in the specified month
+    const flights = await Flight.find({
+      $or: [
+        // Using timeFrom field which is a string in your data model
+        { timeFrom: { $regex: new RegExp(`${startDate.getDate()}.*${getMonthName(month)}.*${year}`) } },
+        // Alternative approach if you store actual dates
+        { departureTime: { $gte: startDate, $lte: endDate } }
+      ]
+    });
+    
+    // If no flights found, return empty array
+    if (flights.length === 0) {
+      return [];
+    }
+    
+    let totalMonthlyRevenue = 0;
+    const flightReports = [];
+    
+    // Process each flight
+    for (const flight of flights) {
+      // Find all confirmed tickets for this flight
+      const tickets = await Ticket.find({
+        flight: flight._id,
+        status: 'confirmed'
+      });
+      
+      // Calculate revenue for this flight
+      const flightRevenue = tickets.reduce((sum, ticket) => sum + ticket.price, 0);
+      
+      // Add to total monthly revenue
+      totalMonthlyRevenue += flightRevenue;
+      
+      // Store flight data for report
+      flightReports.push({
+        flightId: flight.id,
+        airline: flight.airline,
+        route: `${flight.codeFrom} → ${flight.codeTo}`,
+        departureDate: flight.timeFrom,
+        ticketCount: tickets.length,
+        revenue: flightRevenue
+      });
+    }
+    
+    // Calculate percentage and format final report
+    const formattedReport = flightReports.map(flight => ({
+      flightId: flight.flightId,
+      airline: flight.airline,
+      route: flight.route,
+      departureDate: flight.departureDate,
+      ticketCount: flight.ticketCount,
+      revenue: flight.revenue,
+      percentage: totalMonthlyRevenue > 0 
+        ? `${((flight.revenue / totalMonthlyRevenue) * 100).toFixed(2)}%`
+        : '0.00%'
+    }));
+    
+    return {
+      month: month,
+      year: year,
+      totalRevenue: totalMonthlyRevenue,
+      flights: formattedReport
+    };
+  } catch (error) {
+    throw new Error(`Error generating monthly revenue report: ${error.message}`);
+  }
+};
+
+function getMonthName(mm) {
+  return [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ][parseInt(mm, 10) - 1];
+}
