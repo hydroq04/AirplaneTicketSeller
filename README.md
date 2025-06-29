@@ -12,6 +12,8 @@ To build this website, go to **Command Prompt** or **Powershell** and run this
 ```
 echo Build the website UI
 cd frontend
+npm init -y
+npm install
 npm run build
 
 echo Move the built website to backend folder
@@ -20,5 +22,6 @@ cd ../backend
 ren dist frontend
 
 echo Launch the server
+npm install
 node app.js 
 ```
