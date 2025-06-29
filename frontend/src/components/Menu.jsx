@@ -90,7 +90,6 @@ const Menu = ({
                     setShowReportPage?.(true); // gọi mở báo cáo
                     setShowFlightListAdmin?.(false)
                     setShowCustomerListAdmin?.(false)
-                    setActiveTab("revenue")
                   }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showReport ? "bg-blue-500 text-white" : "border border-white text-white"
@@ -105,7 +104,6 @@ const Menu = ({
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(false)
                   setShowFlightListAdmin?.(true)
-                  setActiveTab("flights")
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showListFlight ? "bg-blue-500 text-white" : "border border-white text-white"
@@ -120,7 +118,6 @@ const Menu = ({
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(true)
                   setShowFlightListAdmin?.(false)
-                  setActiveTab("flights")
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showInfoPassenger ? "bg-blue-500 text-white" : "border border-white text-white"

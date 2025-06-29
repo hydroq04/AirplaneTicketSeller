@@ -40,6 +40,7 @@ function FlightListAdmin() {
       
       const data = await response.json();
       setFlights(data);
+      console.log(data);
       setError(null);
     } catch (err) {
       console.error('Error fetching flights:', err);
@@ -147,7 +148,7 @@ function FlightListAdmin() {
     else if (flight._id && flight._id.length > 5) {
       return `#${flight._id.substring(0, 5)}`;
     }
-    return flight._id ? `#${flight._id}` : "#N/A";
+    return flight.id ? `#${flight.id}` : "#N/A";
   };
 
   return (
@@ -227,7 +228,7 @@ function FlightListAdmin() {
                   ) : (
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
-                        <div className="text-sm text-gray-500">Mã chuyến: <span className="text-gray-900 font-medium">{formatFlightId(f._id)}</span></div>
+                        <div className="text-sm text-gray-500">Mã chuyến: <span className="text-gray-900 font-medium">{formatFlightId(f)}</span></div>
                         <div className="text-gray-800 font-semibold w-32">{f.airline}</div>
                         <div className="text-sm text-gray-700">{f.codeFrom} → {f.codeTo}</div>
                         <div className="text-sm text-gray-700">{f.timeFrom ? new Date(f.timeFrom).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''} - {f.timeTo ? new Date(f.timeTo).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</div>
