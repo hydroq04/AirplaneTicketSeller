@@ -105,20 +105,37 @@ function FlightListAdmin() {
   };
 
   const handleAddFlight = async () => {
+  // Kiểm tra các trường bắt buộc
+  const requiredFields = ['airline', 'timeFrom', 'timeTo', 'codeFrom', 'codeTo'];
+  const missingFields = requiredFields.filter(field => !newFlight[field]);
+  
+  if (missingFields.length > 0) {
+    alert(`Vui lòng điền đầy đủ các trường: ${missingFields.join(', ')}`);
+    return;
+  }
+  
   try {
+    // Tìm ID lớn nhất hiện tại và tăng lên 1
+    const highestId = Math.max(...flights.map(f => parseInt(f.id) || 0), 0);
+    const nextId = highestId + 1;
+    
     // Xử lý dữ liệu trước khi gửi đi
     const flightData = {
       ...newFlight,
+      // Tạo ID tự tăng đơn giản
+      id: nextId,
       // Chuyển đổi các trường số thành kiểu số
       price: parseInt(newFlight.price) || 0,
       passengerCount: parseInt(newFlight.passengerCount) || 0,
       capacity: parseInt(newFlight.capacity) || 180,
-      // Định dạng lại timeFrom và timeTo nếu cần
-      timeFrom: newFlight.timeFrom ? new Date(newFlight.timeFrom).toUTCString() : new Date().toUTCString(),
-      timeTo: newFlight.timeTo ? new Date(newFlight.timeTo).toUTCString() : new Date().toUTCString(),
+      // Định dạng lại timeFrom và timeTo với ISO format
+      timeFrom: newFlight.timeFrom ? new Date(newFlight.timeFrom).toISOString() : new Date().toISOString(),
+      timeTo: newFlight.timeTo ? new Date(newFlight.timeTo).toISOString() : new Date().toISOString(),
       // Tự động tính duration nếu cả hai thời gian đều hợp lệ
       duration: newFlight.duration || calculateDuration(newFlight.timeFrom, newFlight.timeTo)
     };
+
+    console.log('Sending flight data:', flightData); // Log để debug
 
     const response = await fetch('http://localhost:3000/api/flights', {
       method: 'POST',
@@ -128,8 +145,16 @@ function FlightListAdmin() {
       body: JSON.stringify(flightData),
     });
 
+    // Xử lý chi tiết lỗi từ API
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      let errorMessage = `HTTP error! Status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage += ` - ${errorData.message || 'Unknown error'}`;
+      } catch (e) {
+        // Nếu không thể parse JSON từ lỗi
+      }
+      throw new Error(errorMessage);
     }
 
     setNewFlight({
@@ -141,7 +166,7 @@ function FlightListAdmin() {
     fetchFlights();
   } catch (err) {
     console.error('Error adding flight:', err);
-    console.log('Request data:', newFlight); // Log dữ liệu để debug
+    console.log('Request data:', newFlight);
     alert('Không thể thêm chuyến bay. Vui lòng thử lại sau. Lỗi: ' + err.message);
   }
 };
@@ -183,7 +208,8 @@ const calculateDuration = (timeFrom, timeTo) => {
     else if (flight._id && flight._id.length > 5) {
       return `#${flight._id.substring(0, 5)}`;
     }
-    return flight._id ? `#${flight.id}` : "#N/A";
+    // Sửa dòng này - đang truy cập flight.id thay vì flight._id
+    return flight._id ? `#${flight._id.substring(0, 5)}` : "#N/A";
   };
 
   return (
@@ -335,7 +361,6 @@ const calculateDuration = (timeFrom, timeTo) => {
                 </button>
               </div>
             )}
-          )}
 
           <div className="space-y-4">
             {filteredFlights.length === 0 ? (
