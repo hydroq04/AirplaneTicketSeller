@@ -135,16 +135,19 @@ function FlightListAdmin() {
 
   const filteredFlights = flights.filter(
     (f) =>
-      (f._id?.toString() || '').toLowerCase().includes(searchId.toLowerCase()) &&
+      ((f.id?.toString() || f._id?.toString() || '').toLowerCase().includes(searchId.toLowerCase())) &&
       (f.airline || '').toLowerCase().includes(searchAirline.toLowerCase())
   );
 
   // Format flight ID for display
-  const formatFlightId = (id) => {
-    if (id && id.length > 5) {
-      return `#${id.substring(0, 5)}`;
+  const formatFlightId = (flight) => {
+    if (flight.id) {
+      return `#${flight.id}`;
     }
-    return id;
+    else if (flight._id && flight._id.length > 5) {
+      return `#${flight._id.substring(0, 5)}`;
+    }
+    return flight._id ? `#${flight._id}` : "#N/A";
   };
 
   return (
