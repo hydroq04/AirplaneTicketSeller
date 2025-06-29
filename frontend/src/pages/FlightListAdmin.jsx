@@ -40,7 +40,6 @@ function FlightListAdmin() {
       
       const data = await response.json();
       setFlights(data);
-      console.log(data);
       setError(null);
     } catch (err) {
       console.error('Error fetching flights:', err);
@@ -106,33 +105,69 @@ function FlightListAdmin() {
   };
 
   const handleAddFlight = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/flights', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newFlight),
-      });
+  try {
+    // Xử lý dữ liệu trước khi gửi đi
+    const flightData = {
+      ...newFlight,
+      // Chuyển đổi các trường số thành kiểu số
+      price: parseInt(newFlight.price) || 0,
+      passengerCount: parseInt(newFlight.passengerCount) || 0,
+      capacity: parseInt(newFlight.capacity) || 180,
+      // Định dạng lại timeFrom và timeTo nếu cần
+      timeFrom: newFlight.timeFrom ? new Date(newFlight.timeFrom).toUTCString() : new Date().toUTCString(),
+      timeTo: newFlight.timeTo ? new Date(newFlight.timeTo).toUTCString() : new Date().toUTCString(),
+      // Tự động tính duration nếu cả hai thời gian đều hợp lệ
+      duration: newFlight.duration || calculateDuration(newFlight.timeFrom, newFlight.timeTo)
+    };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+    const response = await fetch('http://localhost:3000/api/flights', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(flightData),
+    });
 
-
-      setNewFlight({
-        airline: "", timeFrom: "", timeTo: "", codeFrom: "", codeTo: "", 
-        duration: "", type: "Trực tiếp", price: 0, passengerCount: 0, capacity: 180
-      });
-      setShowForm(false);
-      
-
-      fetchFlights();
-    } catch (err) {
-      console.error('Error adding flight:', err);
-      alert('Không thể thêm chuyến bay. Vui lòng thử lại sau.');
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
-  };
+
+    setNewFlight({
+      airline: "", timeFrom: "", timeTo: "", codeFrom: "", codeTo: "", 
+      duration: "", type: "Trực tiếp", price: 0, passengerCount: 0, capacity: 180
+    });
+    setShowForm(false);
+    
+    fetchFlights();
+  } catch (err) {
+    console.error('Error adding flight:', err);
+    console.log('Request data:', newFlight); // Log dữ liệu để debug
+    alert('Không thể thêm chuyến bay. Vui lòng thử lại sau. Lỗi: ' + err.message);
+  }
+};
+
+// Hàm tính thời gian bay
+const calculateDuration = (timeFrom, timeTo) => {
+  if (!timeFrom || !timeTo) return "1h 0m";
+  
+  try {
+    const startTime = new Date(timeFrom);
+    const endTime = new Date(timeTo);
+    
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      return "1h 0m";
+    }
+    
+    const durationMs = endTime - startTime;
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m`;
+  } catch (e) {
+    console.error('Error calculating duration:', e);
+    return "1h 0m";
+  }
+};
 
   const filteredFlights = flights.filter(
     (f) =>
@@ -148,7 +183,7 @@ function FlightListAdmin() {
     else if (flight._id && flight._id.length > 5) {
       return `#${flight._id.substring(0, 5)}`;
     }
-    return flight.id ? `#${flight.id}` : "#N/A";
+    return flight._id ? `#${flight.id}` : "#N/A";
   };
 
   return (
@@ -186,17 +221,120 @@ function FlightListAdmin() {
       ) : (
         <>
           {showForm && (
-            <div className="mb-4 grid grid-cols-2 gap-4 bg-gray-100 p-4 rounded animate-fadeIn">
-              {Object.keys(newFlight).map(key => (
-                <input key={key} type={['price', 'passengerCount', 'capacity'].includes(key) ? 'number' : 'text'}
-                  placeholder={key} value={newFlight[key]}
-                  onChange={(e) => setNewFlight({ ...newFlight, [key]: e.target.value })}
-                  className="p-2 border rounded" />
-              ))}
-              <button onClick={handleAddFlight} className="col-span-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                ➕ Xác nhận thêm chuyến bay
-              </button>
-            </div>
+              <div className="mb-4 bg-gray-100 p-4 rounded animate-fadeIn">
+                <h2 className="text-lg font-semibold mb-4">Thêm chuyến bay mới</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Hãng hàng không</label>
+                    <input 
+                      type="text" 
+                      placeholder="VietJet Air, Vietnam Airlines,..." 
+                      value={newFlight.airline}
+                      onChange={(e) => setNewFlight({ ...newFlight, airline: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Sân bay đi (mã)</label>
+                    <input 
+                      type="text" 
+                      placeholder="SGN, HAN, CXR,..." 
+                      value={newFlight.codeFrom}
+                      onChange={(e) => setNewFlight({ ...newFlight, codeFrom: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Sân bay đến (mã)</label>
+                    <input 
+                      type="text" 
+                      placeholder="SGN, HAN, CXR,..." 
+                      value={newFlight.codeTo}
+                      onChange={(e) => setNewFlight({ ...newFlight, codeTo: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Thời gian khởi hành</label>
+                    <input 
+                      type="datetime-local" 
+                      value={newFlight.timeFrom}
+                      onChange={(e) => setNewFlight({ ...newFlight, timeFrom: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Thời gian đến</label>
+                    <input 
+                      type="datetime-local" 
+                      value={newFlight.timeTo}
+                      onChange={(e) => setNewFlight({ ...newFlight, timeTo: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Loại chuyến bay</label>
+                    <select
+                      value={newFlight.type}
+                      onChange={(e) => setNewFlight({ ...newFlight, type: e.target.value })}
+                      className="p-2 border rounded"
+                    >
+                      <option value="Trực tiếp">Trực tiếp</option>
+                      <option value="1 chặng dừng">1 chặng dừng</option>
+                      <option value="2+ chặng dừng">2+ chặng dừng</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Giá vé (VND)</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      placeholder="VD: 1570780" 
+                      value={newFlight.price}
+                      onChange={(e) => setNewFlight({ ...newFlight, price: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Số chỗ đã đặt</label>
+                    <input 
+                      type="number"
+                      min="0" 
+                      placeholder="VD: 42" 
+                      value={newFlight.passengerCount}
+                      onChange={(e) => setNewFlight({ ...newFlight, passengerCount: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <label className="text-sm text-gray-600 mb-1">Sức chứa tối đa</label>
+                    <input 
+                      type="number"
+                      min="1" 
+                      placeholder="VD: 180" 
+                      value={newFlight.capacity}
+                      onChange={(e) => setNewFlight({ ...newFlight, capacity: e.target.value })}
+                      className="p-2 border rounded" 
+                    />
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={handleAddFlight} 
+                  className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                >
+                  ➕ Xác nhận thêm chuyến bay
+                </button>
+              </div>
+            )}
           )}
 
           <div className="space-y-4">
