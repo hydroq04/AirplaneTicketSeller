@@ -169,6 +169,40 @@ app.get('/api/flights/search', async (req, res) => {
   }
 });
 
+app.post('/api/flights', async (req, res) => {
+  try {
+    const flight = new Flight(req.body);
+    await flight.save();
+    res.status(201).json(flight);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+app.put('/api/flights/:id', async (req, res) => {
+  try {
+    const flight = await Flight.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!flight) {
+      return res.status(404).json({ message: 'Chuyến bay không tìm thấy' });
+    }
+    res.json(flight);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+app.delete('/api/flights/:id', async (req, res) => {
+  try {
+    const flight = await Flight.findByIdAndDelete(req.params.id);
+    if (!flight) {
+      return res.status(404).json({ message: 'Chuyến bay không tìm thấy' });
+    }
+    res.json({ message: 'Chuyến bay đã được xóa' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Hàm hỗ trợ đổi "06" → "Jun"
 function getMonthName(mm) {
   return [
