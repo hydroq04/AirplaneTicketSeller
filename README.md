@@ -23,5 +23,5 @@ ren dist frontend
 
 echo Launch the server
 npm install
-node app.js 
+node ./src/server.js 
 ```
