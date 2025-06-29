@@ -1,0 +1,647 @@
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+// Import models
+const User = require('./models/User');
+const Flight = require('./models/Flight');
+const Booking = require('./models/Booking');
+const Ticket = require('./models/Ticket');
+const Payment = require('./models/Payment');
+const Report = require('./models/Report');
+
+// Initialize Express app
+const app = express();
+const cors = require('cors');
+
+app.use(cors({
+  origin: 'http://localhost:5173',  // đúng port frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+
+const PORT = process.env.PORT || 3000;
+
+// Use config from .env
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+const uri = process.env.MONGO_URI;
+// Connect to MongoDB
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB connected successfully'))
+.catch(err => console.error('MongoDB connection error:', err));
+
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Serve static files from the frontend directory (outside src)
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// Serve the main HTML page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
+
+// User registration
+app.post('/api/users/register', async (req, res) => {
+  try {
+    const user = new User(req.body);
+    await user.save();
+    res.status(201).json({ success: true, userId: user._id });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// User login
+app.post('/api/users/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+    
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+    
+    res.json({ 
+      success: true, 
+      user: {
+        id: user._id,
+        name: user.firstName,
+        lastName: user.lastName,
+        address: user.address,
+        email: user.email,
+        role: user.role,
+        bankInfo: user.bankInfo,
+        dob: user.dob
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Get all flights
+app.get('/api/flights', async (req, res) => {
+  try {
+    const flights = await Flight.find();
+    res.json(flights);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Search flights
+app.get('/api/flights/search', async (req, res) => {
+  try {
+    const { origin, destination, date } = req.query;
+
+    // Location mapping (full names to airport codes)
+    const locationMap = {
+      'hồ chí minh': 'SGN',
+      'tp.hcm': 'SGN',
+      'sài gòn': 'SGN',
+      'hà nội': 'HAN',
+      'hanoi': 'HAN',
+      'đà nẵng': 'DAD',
+      'danang': 'DAD',
+      'nha trang': 'CXR',
+      'cam ranh': 'CXR',
+      'phú quốc': 'PQC',
+      'phu quoc': 'PQC',
+      'đà lạt': 'DLI',
+      'dalat': 'DLI'
+    };
+
+    let query = {};
+    
+    // Process origin parameter
+    if (origin) {
+      // Check if it's a full location name (case insensitive)
+      const normalizedOrigin = origin.toLowerCase().trim();
+      if (locationMap[normalizedOrigin]) {
+        // Use the airport code from our mapping
+        query.codeFrom = locationMap[normalizedOrigin];
+      } else {
+        // If not found in mapping, use as-is (might be a direct airport code)
+        query.codeFrom = origin;
+      }
+    }
+    
+    // Process destination parameter
+    if (destination) {
+      // Check if it's a full location name (case insensitive)
+      const normalizedDest = destination.toLowerCase().trim();
+      if (locationMap[normalizedDest]) {
+        // Use the airport code from our mapping
+        query.codeTo = locationMap[normalizedDest];
+      } else {
+        // If not found in mapping, use as-is (might be a direct airport code)
+        query.codeTo = destination;
+      }
+    }
+
+    if (date) {
+      const [day, month, year] = date.split('/');
+      if (!day || !month || !year) {
+        return res.status(400).json({ message: 'Sai định dạng ngày. Đúng: dd/MM/yyyy' });
+      }
+
+      const keyword = `${day} ${getMonthName(month)} ${year}`; // "30 Jun 2025"
+      query.timeFrom = { $regex: new RegExp(keyword) };
+    }
+
+    const flights = await Flight.find(query);
+    res.json(flights);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Hàm hỗ trợ đổi "06" → "Jun"
+function getMonthName(mm) {
+  return [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ][parseInt(mm, 10) - 1];
+}
+
+// Create booking
+app.post('/api/bookings', async (req, res) => {
+  try {
+    const { customerId, flightId, passengerDetails, seatClass } = req.body;
+    
+    // Get the flight
+    const flight = await Flight.findById(flightId);
+    if (!flight) {
+      return res.status(404).json({ success: false, message: 'Flight not found' });
+    }
+    
+    // Check seat availability
+    if (!flight.hasAvailableSeats()) {
+      return res.status(400).json({ success: false, message: 'No seats available' });
+    }
+    
+    // Create tickets for each passenger type
+    const tickets = [];
+    
+    // Create adult tickets
+    for (let i = 0; i < passengerDetails.adults; i++) {
+      const ticket = new Ticket({
+        ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
+        customer: customerId,
+        flight: flightId,
+        seatNumber: 'A' + Math.floor(Math.random() * 30),
+        class: seatClass || 'Phổ thông',
+        passengerType: 'adults',
+        price: flight.price,
+        status: 'reserved'
+      });
+      await ticket.save();
+      tickets.push(ticket._id);
+    }
+    
+    // Create child tickets
+    for (let i = 0; i < passengerDetails.children; i++) {
+      const ticket = new Ticket({
+        ticketNumber: 'TKT' + Math.floor(Math.random() * 1000000),
+        customer: customerId,
+        flight: flightId,
+        seatNumber: 'C' + Math.floor(Math.random() * 30),
+        class: seatClass || 'Phổ thông',
+        passengerType: 'children',
+        price: flight.price * 0.9, // 10% discount applied
+        status: 'reserved'
+      });
+      await ticket.save();
+      tickets.push(ticket._id);
+    }
+    
+    // Calculate total amount
+    const totalAmount = (passengerDetails.adults * flight.price) + 
+                      (passengerDetails.children * flight.price * 0.9);
+    console.log(totalAmount)
+    // Create booking with all tickets
+    const booking = new Booking({
+      bookingReference: Math.random().toString(36).substring(2, 10).toUpperCase(),
+      customer: customerId,
+      tickets: tickets,
+      totalAmount: totalAmount,
+      status: 'pending',
+      contactInfo: {
+        email: passengerDetails.email,
+        phone: passengerDetails.phone
+      }
+    });
+    await booking.save();
+
+    // Update flight available seats
+    await flight.bookSeats(passengerDetails.adults + passengerDetails.children);
+    
+    res.status(201).json({
+      success: true,
+      booking: {
+        id: booking._id,
+        bookingReference: booking.bookingReference,
+        totalAmount: booking.totalAmount
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Get user bookings
+app.get('/api/bookings/user/:userId', async (req, res) => {
+  try {
+    const bookings = await Booking.find({ customer: req.params.userId })
+      .populate({
+        path: 'tickets',
+        populate: { path: 'flight' }
+      });
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Cancel ticket
+app.put('/api/tickets/:ticketId/cancel', async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    
+    // Find the ticket
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Ticket not found' });
+    }
+    
+    // Only cancel if not already canceled
+    if (ticket.status === 'canceled') {
+      return res.status(400).json({ success: false, message: 'Ticket is already canceled' });
+    }
+    
+    // Save previous status for reference
+    const previousStatus = ticket.status;
+    
+    // Update ticket status
+    ticket.status = 'canceled';
+    await ticket.save();
+    
+    // If the ticket was confirmed, we need to update the flight's available seats
+    if (previousStatus === 'confirmed') {
+      const flight = await Flight.findById(ticket.flight);
+      if (flight) {
+        // Reduce passenger count to free up the seat
+        flight.passengerCount = Math.max(0, flight.passengerCount - 1);
+        await flight.save();
+      }
+    }
+    
+    // Update the booking status if all tickets are canceled
+    const booking = await Booking.findOne({ tickets: ticketId });
+    if (booking) {
+      const allTickets = await Ticket.find({ _id: { $in: booking.tickets } });
+      const allCanceled = allTickets.every(t => t.status === 'canceled');
+      
+      if (allCanceled) {
+        booking.status = 'canceled';
+        await booking.save();
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Ticket has been canceled successfully',
+      ticket: ticket
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Delete ticket
+app.delete('/api/tickets/:ticketId', async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    
+    // Find the ticket
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Ticket not found' });
+    }
+    
+    // If the ticket was confirmed, update the flight's available seats
+    if (ticket.status === 'confirmed') {
+      const flight = await Flight.findById(ticket.flight);
+      if (flight) {
+        // Reduce passenger count to free up the seat
+        flight.passengerCount = Math.max(0, flight.passengerCount - 1);
+        await flight.save();
+      }
+    }
+    
+    // Remove ticket from any booking
+    await Booking.updateMany(
+      { tickets: ticketId },
+      { $pull: { tickets: ticketId } }
+    );
+    
+    // Delete the ticket
+    await Ticket.findByIdAndDelete(ticketId);
+    
+    // Update any empty bookings (no tickets left)
+    const emptyBookings = await Booking.find({ tickets: { $size: 0 } });
+    for (const booking of emptyBookings) {
+      // Option 1: Delete empty bookings
+      await Booking.findByIdAndDelete(booking._id);
+      
+      // Option 2: Or mark them as canceled
+      // booking.status = 'canceled';
+      // await booking.save();
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Ticket has been deleted successfully' 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Update ticket
+app.put('/api/tickets/:ticketId', async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    const { seatNumber, seatClass, status } = req.body;
+    
+    // Find the ticket
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Ticket not found' });
+    }
+    
+    // Update ticket properties
+    if (seatNumber) ticket.seatNumber = seatNumber;
+    if (seatClass) ticket.class = seatClass;
+    
+    // Special handling for status changes
+    if (status && status !== ticket.status) {
+      const previousStatus = ticket.status;
+      ticket.status = status;
+      
+      // If status changed to or from 'confirmed', update flight seats
+      if (status === 'confirmed' || previousStatus === 'confirmed') {
+        const flight = await Flight.findById(ticket.flight);
+        if (flight) {
+          if (status === 'confirmed' && previousStatus !== 'confirmed') {
+            // Increase passenger count if newly confirmed
+            flight.passengerCount += 1;
+          } else if (status !== 'confirmed' && previousStatus === 'confirmed') {
+            // Decrease passenger count if no longer confirmed
+            flight.passengerCount = Math.max(0, flight.passengerCount - 1);
+          }
+          await flight.save();
+        }
+      }
+      
+      // If status changed to 'confirmed', update the booking status if needed
+      if (status === 'confirmed') {
+        const booking = await Booking.findOne({ tickets: ticketId });
+        if (booking && booking.status === 'pending') {
+          booking.status = 'confirmed';
+          await booking.save();
+        }
+      }
+    }
+    
+    await ticket.save();
+    
+    // If part of a booking, update the booking
+    const booking = await Booking.findOne({ tickets: ticketId });
+    if (booking) {
+      // If status changed to 'confirmed', might need to update booking status
+      if (status === 'confirmed' && booking.status === 'pending') {
+        booking.status = 'confirmed';
+        await booking.save();
+      }
+      
+      // Check if all tickets are canceled
+      if (status === 'canceled') {
+        const allTickets = await Ticket.find({ _id: { $in: booking.tickets } });
+        const allCanceled = allTickets.every(t => t.status === 'canceled');
+        
+        if (allCanceled) {
+          booking.status = 'canceled';
+          await booking.save();
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Ticket updated successfully',
+      ticket: ticket
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Confirm booking payment
+app.post('/api/bookings/:bookingId/confirm-payment', async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { paymentMethod } = req.body;
+    
+    // Find the booking
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+    
+    // Only process pending bookings
+    if (booking.status !== 'pending') {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Cannot confirm payment for booking with status: ${booking.status}` 
+      });
+    }
+    
+    // Create a payment record
+    const payment = new Payment({
+      amount: booking.totalAmount,
+      currency: 'VND',
+      paymentMethod: paymentMethod || 'credit_card',
+      status: 'completed',
+      customer: booking.customer
+    });
+    
+    await payment.save();
+    
+    // Update booking status and add payment reference
+    booking.status = 'confirmed';
+    booking.payment = payment._id;
+    await booking.save();
+    
+    // Update all ticket statuses to confirmed
+    await Ticket.updateMany(
+      { _id: { $in: booking.tickets } },
+      { status: 'confirmed' }
+    );
+    
+    res.json({
+      success: true,
+      message: 'Payment confirmed successfully',
+      booking: {
+        id: booking._id,
+        status: booking.status,
+        totalAmount: booking.totalAmount,
+        paymentId: payment._id
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// Monthly Revenue Report (BM5.1)
+app.get('/api/reports/monthly', async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    // Validate input
+    if (!month || !year) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Month and year are required query parameters' 
+      });
+    }
+    
+    // Convert to integers
+    const monthInt = parseInt(month, 10);
+    const yearInt = parseInt(year, 10);
+    
+    // Validate values
+    if (isNaN(monthInt) || isNaN(yearInt) || 
+        monthInt < 1 || monthInt > 12 || 
+        yearInt < 2000 || yearInt > 3000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid month or year values' 
+      });
+    }
+    
+    // Create date range for the requested month
+    const startDate = new Date(yearInt, monthInt - 1, 1);
+    const endDate = new Date(yearInt, monthInt, 0, 23, 59, 59);
+    
+    // Step 1: Find all flights with departure date in the specified month
+    const monthName = getMonthName(monthInt.toString().padStart(2, '0'));
+    const flightPattern = new RegExp(`\\d{2} ${monthName} ${yearInt}`);
+    
+    const flights = await Flight.find({
+      timeFrom: { $regex: flightPattern }
+    });
+    
+    if (flights.length === 0) {
+      return res.json([]);
+    }
+    
+    // Step 2: Process each flight to get ticket sales and revenue
+    let totalMonthlyRevenue = 0;
+    const flightReports = [];
+    
+    for (const flight of flights) {
+      // Find all confirmed tickets for this flight
+      const tickets = await Ticket.find({
+        flight: flight._id,
+        status: 'confirmed'
+      });
+      
+      // Calculate revenue for this flight (sum of all ticket prices)
+      const flightRevenue = tickets.reduce((sum, ticket) => sum + ticket.price, 0);
+      
+      // Add to total monthly revenue
+      totalMonthlyRevenue += flightRevenue;
+      
+      flightReports.push({
+        flightId: flight.id,
+        airline: flight.airline,
+        route: `${flight.codeFrom} → ${flight.codeTo}`,
+        departureDate: flight.timeFrom,
+        ticketCount: tickets.length,
+        revenue: flightRevenue
+      });
+    }
+    
+    // Step 4: Calculate percentage for each flight
+    const reportData = flightReports.map(flight => ({
+      flightId: flight.flightId,
+      airline: flight.airline,
+      route: flight.route,
+      departureDate: flight.departureDate,
+      ticketCount: flight.ticketCount,
+      revenue: flight.revenue,
+      percentage: totalMonthlyRevenue > 0 
+        ? `${((flight.revenue / totalMonthlyRevenue) * 100).toFixed(2)}%`
+        : '0.00%'
+    }));
+    
+    // Optional: Save this report to the database
+    const report = new Report({
+      name: `Monthly Revenue Report - ${monthInt}/${yearInt}`,
+      type: 'monthly',
+      period: {
+        startDate,
+        endDate
+      },
+      data: {
+        totalRevenue: totalMonthlyRevenue,
+        totalBookings: reportData.reduce((sum, flight) => sum + flight.ticketCount, 0),
+        popularRoutes: reportData.map(flight => ({
+          origin: flight.route.split(' → ')[0],
+          destination: flight.route.split(' → ')[1],
+          count: flight.ticketCount
+        }))
+      },
+      createdBy: req.user ? req.user._id : null // You may need to adjust this based on your auth system
+    });
+    
+    await report.save();
+    
+    res.json({
+      month: monthInt,
+      year: yearInt,
+      totalRevenue: totalMonthlyRevenue,
+      flights: reportData
+    });
+    
+  } catch (error) {
+    console.error('Error generating monthly revenue report:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error generating monthly revenue report', 
+      error: error.message 
+    });
+  }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app;
