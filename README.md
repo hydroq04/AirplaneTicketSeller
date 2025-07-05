@@ -19,7 +19,7 @@ npm run build
 echo Move the built website to backend folder
 move dist ../backend
 cd ../backend
-ren dist frontend
+ren dist client
 
 echo Launch the server
 npm install
