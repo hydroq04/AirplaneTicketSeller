@@ -45,6 +45,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  cccd: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true,  // Cho phép null/undefined và chỉ áp dụng unique khi có giá trị
+    validate: {
+      validator: function(v) {
+        // Kiểm tra CCCD gồm 12 chữ số
+        return !v || /^\d{12}$/.test(v);
+      },
+      message: props => `${props.value} không phải là số CCCD hợp lệ!`
+    }
+  },
 }, {
   timestamps: true
 });
