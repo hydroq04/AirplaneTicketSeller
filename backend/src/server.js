@@ -11,6 +11,7 @@ const Booking = require('./models/Booking');
 const Ticket = require('./models/Ticket');
 const Payment = require('./models/Payment');
 const Report = require('./models/Report');
+const Regulation = require('./models/Regulation');
 
 // Initialize Express app
 const app = express();
@@ -216,13 +217,29 @@ app.post('/api/bookings', async (req, res) => {
   try {
     const { customerId, flightId, passengerDetails, seatClass } = req.body;
     
-    // Get the flight
+    // Lấy quy định hiện tại
+    const regulations = await Regulation.getRegulations();
+    
+    // Lấy thông tin chuyến bay
     const flight = await Flight.findById(flightId);
     if (!flight) {
-      return res.status(404).json({ success: false, message: 'Flight not found' });
+      return res.status(404).json({ success: false, message: 'Không tìm thấy chuyến bay' });
     }
     
-    // Check seat availability
+    // Kiểm tra thời gian đặt vé so với quy định
+    const now = new Date();
+    const departureTime = new Date(flight.timeFrom);
+    const hoursUntilDeparture = (departureTime - now) / (1000 * 60 * 60);
+    
+    if (hoursUntilDeparture < regulations.thoiGianDatVeChamNhat) {
+      return res.status(400).json({
+        success: false,
+        message: `Vé phải được đặt ít nhất ${regulations.thoiGianDatVeChamNhat} giờ trước khi khởi hành`
+      });
+    }
+    
+    // Tiếp tục với logic đặt vé hiện tại
+    // Get the flight
     if (!flight.hasAvailableSeats()) {
       return res.status(400).json({ success: false, message: 'No seats available' });
     }
@@ -265,7 +282,7 @@ app.post('/api/bookings', async (req, res) => {
     // Calculate total amount
     const totalAmount = (passengerDetails.adults * flight.price) + 
                       (passengerDetails.children * flight.price * 0.9);
-    console.log(totalAmount)
+    
     // Create booking with all tickets
     const booking = new Booking({
       bookingReference: Math.random().toString(36).substring(2, 10).toUpperCase(),
@@ -315,35 +332,50 @@ app.put('/api/tickets/:ticketId/cancel', async (req, res) => {
   try {
     const { ticketId } = req.params;
     
-    // Find the ticket
-    const ticket = await Ticket.findById(ticketId);
+    // Tìm vé
+    const ticket = await Ticket.findById(ticketId).populate('flight');
     if (!ticket) {
-      return res.status(404).json({ success: false, message: 'Ticket not found' });
+      return res.status(404).json({ success: false, message: 'Không tìm thấy vé' });
     }
     
-    // Only cancel if not already canceled
+    // Lấy quy định hiện tại
+    const regulations = await Regulation.getRegulations();
+    
+    // Kiểm tra thời gian hủy vé so với quy định
+    const now = new Date();
+    const departureTime = new Date(ticket.flight.timeFrom);
+    const daysUntilDeparture = (departureTime - now) / (1000 * 60 * 60 * 24);
+    
+    if (daysUntilDeparture < regulations.thoiGianHuyVe) {
+      return res.status(400).json({
+        success: false,
+        message: `Vé chỉ có thể được hủy ít nhất ${regulations.thoiGianHuyVe} ngày trước khi khởi hành`
+      });
+    }
+    
+    // Chỉ hủy nếu chưa được hủy
     if (ticket.status === 'canceled') {
-      return res.status(400).json({ success: false, message: 'Ticket is already canceled' });
+      return res.status(400).json({ success: false, message: 'Vé đã được hủy' });
     }
     
-    // Save previous status for reference
+    // Lưu trạng thái trước đó để tham khảo
     const previousStatus = ticket.status;
     
-    // Update ticket status
+    // Cập nhật trạng thái vé
     ticket.status = 'canceled';
     await ticket.save();
     
-    // If the ticket was confirmed, we need to update the flight's available seats
+    // Nếu vé đã được xác nhận, cần cập nhật số ghế của chuyến bay
     if (previousStatus === 'confirmed') {
       const flight = await Flight.findById(ticket.flight);
       if (flight) {
-        // Reduce passenger count to free up the seat
+        // Giảm số lượng hành khách để giải phóng ghế
         flight.passengerCount = Math.max(0, flight.passengerCount - 1);
         await flight.save();
       }
     }
     
-    // Update the booking status if all tickets are canceled
+    // Cập nhật trạng thái đặt vé nếu tất cả vé đều bị hủy
     const booking = await Booking.findOne({ tickets: ticketId });
     if (booking) {
       const allTickets = await Ticket.find({ _id: { $in: booking.tickets } });
@@ -357,7 +389,7 @@ app.put('/api/tickets/:ticketId/cancel', async (req, res) => {
     
     res.json({ 
       success: true, 
-      message: 'Ticket has been canceled successfully',
+      message: 'Vé đã được hủy thành công',
       ticket: ticket
     });
   } catch (error) {
@@ -668,6 +700,68 @@ app.get('/api/reports/monthly', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Error generating monthly revenue report', 
+      error: error.message 
+    });
+  }
+});
+
+// Lấy quy định hiện tại
+app.get('/api/regulations', async (req, res) => {
+  try {
+    const regulations = await Regulation.getRegulations();
+    res.json(regulations);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi lấy quy định', 
+      error: error.message 
+    });
+  }
+});
+
+// Cập nhật quy định
+app.put('/api/regulations', async (req, res) => {
+  try {
+    // Có thể thêm kiểm tra quyền admin ở đây nếu cần
+    
+    let regulations = await Regulation.findOne();
+    if (!regulations) {
+      regulations = new Regulation();
+    }
+    
+    // Cập nhật các trường từ request body
+    const updateFields = [
+      'soLuongSanBay',
+      'thoiGianBayToiThieu',
+      'soSanBayTrungGianToiDa',
+      'thoiGianDungToiThieu',
+      'thoiGianDungToiDa',
+      'thoiGianDatVeChamNhat',
+      'thoiGianHuyVe'
+    ];
+    
+    updateFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        // Kiểm tra giá trị số phải dương
+        if (typeof req.body[field] === 'number' && req.body[field] >= 0) {
+          regulations[field] = req.body[field];
+        } else if (req.body[field] !== undefined) {
+          throw new Error(`Trường ${field} phải là số dương`);
+        }
+      }
+    });
+    
+    await regulations.save();
+    
+    res.json({
+      success: true,
+      message: 'Quy định đã được cập nhật thành công',
+      regulations
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: 'Lỗi khi cập nhật quy định', 
       error: error.message 
     });
   }
