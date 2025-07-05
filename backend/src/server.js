@@ -93,6 +93,24 @@ app.post('/api/users/login', async (req, res) => {
   }
 });
 
+
+// Get user list
+app.get('/api/users', async (req, res) => {
+  try {
+    // Lấy danh sách người dùng có role="user"
+    const users = await User.find({ role: 'user' }).select('-password');
+    
+    res.json({
+      success: true,
+      count: users.length,
+      users: users
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách users:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Get all flights
 app.get('/api/flights', async (req, res) => {
   try {
