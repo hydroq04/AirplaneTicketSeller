@@ -41,12 +41,12 @@ mongoose.connect(uri, {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from the frontend directory (outside src)
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Serve static files from the client directory (outside src)
+app.use(express.static(path.join(__dirname, '..', 'client')));
 
 // Serve the main HTML page
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
 });
 
 // User registration
@@ -275,7 +275,7 @@ app.post('/api/bookings', async (req, res) => {
         class: seatClass || 'Phổ thông',
         passengerType: 'adults',
         price: flight.price,
-        status: 'reserved'
+        status: 'confirmed'
       });
       await ticket.save();
       tickets.push(ticket._id);
@@ -291,7 +291,7 @@ app.post('/api/bookings', async (req, res) => {
         class: seatClass || 'Phổ thông',
         passengerType: 'children',
         price: flight.price * 0.9, // 10% discount applied
-        status: 'reserved'
+        status: 'confirmed'
       });
       await ticket.save();
       tickets.push(ticket._id);
@@ -307,7 +307,7 @@ app.post('/api/bookings', async (req, res) => {
       customer: customerId,
       tickets: tickets,
       totalAmount: totalAmount,
-      status: 'pending',
+      status: 'confirmed',
       contactInfo: {
         email: passengerDetails.email,
         phone: passengerDetails.phone
@@ -545,42 +545,54 @@ app.put('/api/tickets/:ticketId', async (req, res) => {
 });
 
 // Confirm booking payment
-app.post('/api/bookings/:bookingId/confirm-payment', async (req, res) => {
+app.post('/api/bookings/:bookingId/quick-payment', async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { paymentMethod } = req.body;
     
-    // Find the booking
+    // Tìm booking
     const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
     
-    // Only process pending bookings
-    if (booking.status !== 'pending') {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Cannot confirm payment for booking with status: ${booking.status}` 
+    // Nếu đã thanh toán rồi thì trả về thành công luôn
+    if (booking.status === 'confirmed') {
+      return res.json({
+        success: true,
+        message: 'Booking already paid',
+        booking: {
+          id: booking._id,
+          status: booking.status,
+          totalAmount: booking.totalAmount
+        }
       });
     }
     
-    // Create a payment record
+    // Chỉ xử lý booking đang pending
+    if (booking.status !== 'pending') {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Cannot process payment for booking with status: ${booking.status}` 
+      });
+    }
+    
+    // Tạo thanh toán và đặt mặc định là đã hoàn tất
     const payment = new Payment({
       amount: booking.totalAmount,
       currency: 'VND',
-      paymentMethod: paymentMethod || 'credit_card',
+      paymentMethod: 'credit_card', // Mặc định
       status: 'completed',
       customer: booking.customer
     });
     
     await payment.save();
     
-    // Update booking status and add payment reference
+    // Cập nhật booking
     booking.status = 'confirmed';
     booking.payment = payment._id;
     await booking.save();
     
-    // Update all ticket statuses to confirmed
+    // Cập nhật tất cả vé thành confirmed
     await Ticket.updateMany(
       { _id: { $in: booking.tickets } },
       { status: 'confirmed' }
@@ -588,16 +600,15 @@ app.post('/api/bookings/:bookingId/confirm-payment', async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Payment confirmed successfully',
+      message: 'Payment successful',
       booking: {
         id: booking._id,
         status: booking.status,
-        totalAmount: booking.totalAmount,
-        paymentId: payment._id
+        totalAmount: booking.totalAmount
       }
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
