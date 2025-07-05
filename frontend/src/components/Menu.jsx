@@ -28,6 +28,7 @@ const Menu = ({
   const [showReport, setShowReport] = useState(false);
   const [showListFlight, setShowListFlight] = useState(false);
   const [showInfoPassenger, setShowInfoPassenger] = useState(false);
+  const [showChangePolicy, setShowChangePolicy] = useState(false);
 
   const { language, country, currency } = RegionModel.getLCC();
 
@@ -43,6 +44,7 @@ const Menu = ({
     setShowReport(section === "report");
     setShowListFlight(section === "listFlight");
     setShowInfoPassenger(section === "infoPassenger");
+    setShowChangePolicy(section === "changePolicy");
   };
 
   return (
@@ -89,6 +91,7 @@ const Menu = ({
                     handleAdminClick("report");
                     setShowReportPage?.(true); // gọi mở báo cáo
                     setShowFlightListAdmin?.(false)
+                    setShowChangePolicy(false);
                     setShowCustomerListAdmin?.(false)
                   }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
@@ -103,6 +106,7 @@ const Menu = ({
                   setLogin?.setShowHome?.(false)
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(false)
+                  setShowChangePolicy(false);
                   setShowFlightListAdmin?.(true)
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
@@ -117,13 +121,29 @@ const Menu = ({
                   setLogin?.setShowHome?.(false)
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(true)
+                  setShowChangePolicy(false);
                   setShowFlightListAdmin?.(false)
+
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showInfoPassenger ? "bg-blue-500 text-white" : "border border-white text-white"
                 }`}
               >
                 Thông tin khách hàng
+              </button>
+              <button
+                onClick={() => {
+                  handleAdminClick("changePolicy");
+                  setLogin?.setShowHome?.(false)
+                  setShowReportPage?.(false); 
+                  setShowCustomerListAdmin?.(false)
+                  setShowFlightListAdmin?.(false)
+                  setShowChangePolicy(true);
+                }}
+                className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
+                  showChangePolicy ? "bg-blue-500 text-white" : "border border-white text-white"
+                }`}>
+                Thay Đổi Quy Định
               </button>
             </>
           )}
