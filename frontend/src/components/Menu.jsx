@@ -21,7 +21,8 @@ const Menu = ({
   setActiveTab,
   setShowCustomerListAdmin,
   setShowForm,
-  setIsAdmin
+  setIsAdmin,
+  setShowChangePolicy_
 }) => {
   if (!RegionModel) return null;
   const [showAccountPopup, setShowAccountPopup] = useState(false);
@@ -91,7 +92,7 @@ const Menu = ({
                     handleAdminClick("report");
                     setShowReportPage?.(true); // gọi mở báo cáo
                     setShowFlightListAdmin?.(false)
-                    setShowChangePolicy(false);
+                    setShowChangePolicy_?.(false);
                     setShowCustomerListAdmin?.(false)
                   }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
@@ -106,8 +107,8 @@ const Menu = ({
                   setLogin?.setShowHome?.(false)
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(false)
-                  setShowChangePolicy(false);
-                  setShowFlightListAdmin?.(true)
+                  setShowChangePolicy_?.(false);
+                  setShowFlightListAdmin?.(true);
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showListFlight ? "bg-blue-500 text-white" : "border border-white text-white"
@@ -121,8 +122,8 @@ const Menu = ({
                   setLogin?.setShowHome?.(false)
                   setShowReportPage?.(false); 
                   setShowCustomerListAdmin?.(true)
-                  setShowChangePolicy(false);
-                  setShowFlightListAdmin?.(false)
+                  setShowChangePolicy_?.(false);
+                  setShowFlightListAdmin?.(false);
 
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
@@ -135,10 +136,10 @@ const Menu = ({
                 onClick={() => {
                   handleAdminClick("changePolicy");
                   setLogin?.setShowHome?.(false)
-                  setShowReportPage?.(false); 
-                  setShowCustomerListAdmin?.(false)
-                  setShowFlightListAdmin?.(false)
-                  setShowChangePolicy(true);
+                  setShowReportPage?.(false);
+                  setShowCustomerListAdmin?.(false);
+                  setShowFlightListAdmin?.(false);
+                  setShowChangePolicy_(true);
                 }}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ease-in-out ${
                   showChangePolicy ? "bg-blue-500 text-white" : "border border-white text-white"

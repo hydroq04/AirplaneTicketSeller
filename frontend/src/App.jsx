@@ -10,6 +10,7 @@ import FlightDetailPanel from "./components/FlightDetailPanel";
 import RevenueReport from "./pages/RevenueReport";
 import FlightListAdmin from "./pages/FlightListAdmin";
 import CustomerListAdmin from "./pages/CustomerListAdmin";
+import RegulationPage from "./pages/RegulationPage";
 
 
 function App() {
@@ -40,7 +41,7 @@ function App() {
   const [showReportPage, setShowReportPage] = useState(false);
   const [showFlightListAdmin, setShowFlightListAdmin] = useState(false)
   const [showCustomerListAdmin, setShowCustomerListAdmin] = useState(false)
-  
+  const [showChangePolicy_, setShowChangePolicy_] = useState(false)
 
   const setUpLogin = () => {
     if (!logined) {
@@ -130,6 +131,7 @@ const Homeadmin = () => {
             setShowCustomerListAdmin = {setShowCustomerListAdmin}
             setShowForm={setShowForm}
             setIsAdmin = {setIsAdmin}
+            setShowChangePolicy_ = {setShowChangePolicy_}
           />
           
           <BoughtTicketsList
@@ -244,7 +246,13 @@ const Homeadmin = () => {
       >
         <FlightListAdmin />
       </div>
-
+      <div
+        className={`transition-all duration-500 ease-in-out transform ${
+          showChangePolicy_ ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
+        }`} 
+      >
+        <RegulationPage showChangePolicy_={showChangePolicy_} />
+      </div>
       <div
         className={`transition-all duration-500 ease-in-out transform ${
           showCustomerListAdmin ? "opacity-100 scale-100 max-h-[9999px]" : "opacity-0 scale-95 max-h-0 overflow-hidden pointer-events-none"
