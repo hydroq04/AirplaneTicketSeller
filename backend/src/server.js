@@ -222,6 +222,57 @@ app.delete('/api/flights/:id', async (req, res) => {
   }
 });
 
+// Get tickets count by class for a specific flight
+app.get('/api/flights/:flightId/tickets-by-class', async (req, res) => {
+  try {
+    const { flightId } = req.params;
+    
+    // Tìm flight theo id
+    const flight = await Flight.findOne({ id: parseInt(flightId) });
+    if (!flight) {
+      return res.status(404).json({ success: false, message: 'Flight not found' });
+    }
+    
+    // Sử dụng id của flight để tìm vé
+    const ticketsByClass = await Ticket.aggregate([
+      // Lọc vé của chuyến bay này và không bị hủy
+      { $match: { flight: new mongoose.Types.ObjectId(flight._id), status: { $ne: 'canceled' } } },
+      // Nhóm theo hạng ghế và đếm
+      { $group: { 
+        _id: "$class", 
+        count: { $sum: 1 } 
+      }},
+      // Định dạng kết quả
+      { $project: {
+        _id: 0,
+        class: "$_id",
+        count: 1
+      }}
+    ]);
+    
+    // Phần còn lại giữ nguyên
+    const allClasses = ['Phổ thông', 'Thương gia', 'Hạng nhất'];
+    const result = allClasses.map(className => {
+      const found = ticketsByClass.find(item => item.class === className);
+      return {
+        class: className,
+        count: found ? found.count : 0
+      };
+    });
+    
+    res.json({
+      success: true,
+      flightId: flight.id,
+      flightCode: `${flight.airline} (${flight.codeFrom}-${flight.codeTo})`,
+      ticketsByClass: result,
+      totalTickets: result.reduce((sum, item) => sum + item.count, 0)
+    });
+  } catch (error) {
+    console.error('Error getting tickets by class:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Hàm hỗ trợ đổi "06" → "Jun"
 function getMonthName(mm) {
   return [
