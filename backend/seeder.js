@@ -3,10 +3,11 @@ const path = require('path');
 const mongoose = require('mongoose');
 const User = require('./src/models/User');
 const Flight = require('./src/models/Flight');
-const Booking = require('./src/models/Booking'); // Import mới
-const Ticket = require('./src/models/Ticket'); // Import mới
-const Payment = require('./src/models/Payment'); // Import mới
-const Report = require('./src/models/Report'); // Import mới
+const Booking = require('./src/models/Booking'); 
+const Ticket = require('./src/models/Ticket'); 
+const Payment = require('./src/models/Payment'); 
+const Report = require('./src/models/Report'); 
+const Regulation = require('./src/models/Regulation');
 
 dotenv.config({ path: path.join(__dirname, '.', '.env') });
 
@@ -447,8 +448,22 @@ const importData = async () => {
         }
       },
       createdBy: adminUser._id
+
     });
     console.log('Reports created.');
+
+    // Tạo quy định mặc định
+    await Regulation.deleteMany();
+    await Regulation.create({
+      soLuongSanBay: 20,
+      thoiGianBayToiThieu: 30,
+      soSanBayTrungGianToiDa: 2,
+      thoiGianDungToiThieu: 20,
+      thoiGianDungToiDa: 45,
+      thoiGianDatVeChamNhat: 12,
+      thoiGianHuyVe: 1
+    });
+    console.log('Default regulations created.');
 
     console.log('Data Imported Successfully!');
     process.exit();
