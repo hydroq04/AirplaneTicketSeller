@@ -167,8 +167,9 @@ const Menu = ({
               ticketCount={ticketCount}
               onClose={() => setShowAccountPopup(false)}
               onLogout={onLogout}
-                switchToHome= {switchToHome}
-                setIsAdmin = {setIsAdmin}
+              switchToHome= {switchToHome}
+              setIsAdmin = {setIsAdmin}
+              switchToHomeAdmin={switchToHomeAdmin}
             />
           )}
         </div>

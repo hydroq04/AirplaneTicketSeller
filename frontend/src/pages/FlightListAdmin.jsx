@@ -107,6 +107,7 @@ function FlightListAdmin() {
 
   const handleAddFlight = async () => {
     try {
+      
       const response = await fetch('http://localhost:3000/api/flights', {
         method: 'POST',
         headers: {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount,switchToHome,setIsAdmin }) => {
+const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount,switchToHome,setIsAdmin, switchToHomeAdmin }) => {
   const [isVisible, setIsVisible] = useState(true);
   const ref = useRef();
 
@@ -63,7 +63,12 @@ const AccountInfoPopup = ({ user, onClose, onLogout, ticketCount,switchToHome,se
 
         <button
           onClick={() => {
-            switchToHome();
+            if (user.role === "admin") {
+              switchToHomeAdmin(); // chuyển đến trang quản trị
+              switchToHome();
+            } else {
+              switchToHome(); // chuyển đến trang chính
+            }
             setIsAdmin(false)
             setTimeout(() => {
               hideWithAnimation();       // animation ẩn
