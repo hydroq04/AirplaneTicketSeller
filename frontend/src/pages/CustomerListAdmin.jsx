@@ -1,107 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Pencil, Trash2, Eye, PlusCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const initialCustomers = [
-  {
-    email: "alice@example.com",
-    name: "Alice",
-    age: 25,
-    dob: "2000-01-01",
-    address: "Hà Nội",
-    bankInfo: "VCB - 123456789",
-    tickets: 3,
-  },
-  {
-    email: "alex@alpha.com",
-    name: "Alex",
-    age: 26,
-    dob: "1999-08-20",
-    address: "Nam Định",
-    bankInfo: "MB - 222333444",
-    tickets: 2,
-  },
-  {
-    email: "amanda@flower.com",
-    name: "Amanda",
-    age: 24,
-    dob: "2001-02-14",
-    address: "Quảng Nam",
-    bankInfo: "ACB - 111222333",
-    tickets: 1,
-  },
-  {
-    email: "bob@example.com",
-    name: "Bob",
-    age: 30,
-    dob: "1995-05-10",
-    address: "TP.HCM",
-    bankInfo: "TCB - 987654321",
-    tickets: 1,
-  },
-  {
-    email: "brian@beta.com",
-    name: "Brian",
-    age: 31,
-    dob: "1994-04-22",
-    address: "Long An",
-    bankInfo: "VCB - 444555666",
-    tickets: 3,
-  },
-  {
-    email: "bella@beauty.vn",
-    name: "Bella",
-    age: 27,
-    dob: "1997-07-07",
-    address: "Vĩnh Long",
-    bankInfo: "BIDV - 999888777",
-    tickets: 2,
-  },
-  {
-    email: "charlie@domain.com",
-    name: "Charlie",
-    age: 28,
-    dob: "1997-03-15",
-    address: "Đà Nẵng",
-    bankInfo: "ACB - 654321987",
-    tickets: 2,
-  },
-  {
-    email: "chloe@cloud.com",
-    name: "Chloe",
-    age: 23,
-    dob: "2002-12-01",
-    address: "Đồng Nai",
-    bankInfo: "Techcombank - 1122338899",
-    tickets: 4,
-  },
-  {
-    email: "catherine@cafe.vn",
-    name: "Catherine",
-    age: 29,
-    dob: "1996-10-10",
-    address: "Bình Định",
-    bankInfo: "Sacombank - 5566778899",
-    tickets: 5,
-  },
-  {
-    email: "david@dev.com",
-    name: "David",
-    age: 33,
-    dob: "1992-06-06",
-    address: "Hà Nam",
-    bankInfo: "Agribank - 1010101010",
-    tickets: 1,
-  },
-];
+// const initialCustomers = [
+//   {
+//     email: "alice@example.com",
+//     name: "Alice",
+//     age: 25,
+//     dob: "2000-01-01",
+//     address: "Hà Nội",
+//     bankInfo: "VCB - 123456789",
+//     tickets: 3,
+//   },
+//   {
+//     email: "alex@alpha.com",
+//     name: "Alex",
+//     age: 26,
+//     dob: "1999-08-20",
+//     address: "Nam Định",
+//     bankInfo: "MB - 222333444",
+//     tickets: 2,
+//   },
+//   {
+//     email: "amanda@flower.com",
+//     name: "Amanda",
+//     age: 24,
+//     dob: "2001-02-14",
+//     address: "Quảng Nam",
+//     bankInfo: "ACB - 111222333",
+//     tickets: 1,
+//   },
+//   {
+//     email: "bob@example.com",
+//     name: "Bob",
+//     age: 30,
+//     dob: "1995-05-10",
+//     address: "TP.HCM",
+//     bankInfo: "TCB - 987654321",
+//     tickets: 1,
+//   },
+//   {
+//     email: "brian@beta.com",
+//     name: "Brian",
+//     age: 31,
+//     dob: "1994-04-22",
+//     address: "Long An",
+//     bankInfo: "VCB - 444555666",
+//     tickets: 3,
+//   },
+//   {
+//     email: "bella@beauty.vn",
+//     name: "Bella",
+//     age: 27,
+//     dob: "1997-07-07",
+//     address: "Vĩnh Long",
+//     bankInfo: "BIDV - 999888777",
+//     tickets: 2,
+//   },
+//   {
+//     email: "charlie@domain.com",
+//     name: "Charlie",
+//     age: 28,
+//     dob: "1997-03-15",
+//     address: "Đà Nẵng",
+//     bankInfo: "ACB - 654321987",
+//     tickets: 2,
+//   },
+//   {
+//     email: "chloe@cloud.com",
+//     name: "Chloe",
+//     age: 23,
+//     dob: "2002-12-01",
+//     address: "Đồng Nai",
+//     bankInfo: "Techcombank - 1122338899",
+//     tickets: 4,
+//   },
+//   {
+//     email: "catherine@cafe.vn",
+//     name: "Catherine",
+//     age: 29,
+//     dob: "1996-10-10",
+//     address: "Bình Định",
+//     bankInfo: "Sacombank - 5566778899",
+//     tickets: 5,
+//   },
+//   {
+//     email: "david@dev.com",
+//     name: "David",
+//     age: 33,
+//     dob: "1992-06-06",
+//     address: "Hà Nam",
+//     bankInfo: "Agribank - 1010101010",
+//     tickets: 1,
+//   },
+// ];
 
-
-const CustomerListAdmin = () => {
-  const [customers, setCustomers] = useState(initialCustomers);
+const CustomerListAdmin = ({ showCustomerListAdmin }) => {
+  const [customers, setCustomers] = useState([]);
   const [editingEmail, setEditingEmail] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [searchName, setSearchName] = useState("");
   const [searchEmail, setSearchEmail] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [newCustomer, setNewCustomer] = useState({
     email: "",
@@ -112,6 +113,36 @@ const CustomerListAdmin = () => {
     bankInfo: "",
     tickets: 0,
   });
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/users");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.users)) {
+          // Map API user to table customer fields
+          const mapped = data.users.map((u) => ({
+            email: u.email,
+            name: [u.firstName, u.lastName].filter(Boolean).join(" "),
+            age: u.dob ? new Date().getFullYear() - new Date(u.dob).getFullYear() : "",
+            dob: u.dob ? u.dob.slice(0, 10) : "",
+            address: u.address || "",
+            bankInfo: u.bankInfo || "",
+            tickets: u.tickets || 0,
+          }));
+          setCustomers(mapped);
+        } else {
+          setError("Không thể tải danh sách khách hàng");
+        }
+      } catch (err) {
+        setError("Lỗi kết nối server");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [showCustomerListAdmin]);
 
   const handleAdd = () => {
     if (!newCustomer.email || !newCustomer.name) return alert("Thiếu thông tin");
@@ -146,8 +177,8 @@ const CustomerListAdmin = () => {
 
   const filteredCustomers = customers.filter(
     (c) =>
-      c.name.toLowerCase().includes(searchName.toLowerCase()) &&
-      c.email.toLowerCase().includes(searchEmail.toLowerCase())
+      c.name?.toLowerCase().includes(searchName.toLowerCase()) &&
+      c.email?.toLowerCase().includes(searchEmail.toLowerCase())
   );
 
   return (
@@ -163,7 +194,6 @@ const CustomerListAdmin = () => {
         </button>
       </div>
 
-      {/* Form thêm khách hàng */}
       <AnimatePresence>
         {showForm && (
           <motion.div
@@ -196,7 +226,6 @@ const CustomerListAdmin = () => {
         )}
       </AnimatePresence>
 
-      {/* Tìm kiếm */}
       <div className="flex text-black flex-col sm:flex-row gap-4 mb-4">
         <input
           type="text"
@@ -214,77 +243,82 @@ const CustomerListAdmin = () => {
         />
       </div>
 
-      {/* Danh sách */}
-      <div className="overflow-auto border rounded-xl shadow bg-white text-black">
-        <table className="min-w-full text-sm text-left">
-          <thead className="bg-gray-100 text-gray-600">
-            <tr>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Tên</th>
-              <th className="px-4 py-2">Tuổi</th>
-              <th className="px-4 py-2">Ngày sinh</th>
-              <th className="px-4 py-2">Địa chỉ</th>
-              <th className="px-4 py-2">Ngân hàng</th>
-              <th className="px-4 py-2">🎫 Vé</th>
-              <th className="px-4 py-2">Tác vụ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCustomers.map((c) => (
-              <tr
-                key={c.email}
-                className={`border-t ${editingEmail === c.email ? "bg-yellow-50" : ""}`}
-              >
-                {["email", "name", "age", "dob", "address", "bankInfo"].map((field) => (
-                  <td key={field} className="px-4 py-2">
-                    {editingEmail === c.email ? (
-                      <input
-                        value={c[field]}
-                        onChange={(e) => handleSave(c.email, field, e.target.value)}
-                        className="border border-gray-400 p-1 px-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                      />
-                    ) : (
-                      <span className="text-gray-900">{c[field]}</span>
-                    )}
-                  </td>
-                ))}
-                <td className="px-4 py-2 text-center font-semibold text-blue-600">
-                  {c.tickets}
-                </td>
-                <td className="px-4 py-2 space-x-2">
-                  {editingEmail === c.email ? (
-                    <button
-                      onClick={() => setEditingEmail(null)}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      ✔
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEdit(c.email)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Pencil className="w-4 h-4 inline" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(c.email)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="w-4 h-4 inline" />
-                  </button>
-                  <button
-                    onClick={() => alert("Xem chi tiết khách hàng")}
-                    className="text-indigo-600 hover:text-indigo-800"
-                  >
-                    <Eye className="w-4 h-4 inline" />
-                  </button>
-                </td>
+      {/* Loading/Error */}
+      {loading && <p>⏳ Đang tải danh sách khách hàng...</p>}
+      {error && <p className="text-red-600">{error}</p>}
+
+      {!loading && !error && (
+        <div className="overflow-auto border rounded-xl shadow bg-white text-black">
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-gray-100 text-gray-600">
+              <tr>
+                <th className="px-4 py-2">Email</th>
+                <th className="px-4 py-2">Tên</th>
+                <th className="px-4 py-2">Tuổi</th>
+                <th className="px-4 py-2">Ngày sinh</th>
+                <th className="px-4 py-2">Địa chỉ</th>
+                <th className="px-4 py-2">Ngân hàng</th>
+                <th className="px-4 py-2">🎫 Vé</th>
+                <th className="px-4 py-2">Tác vụ</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredCustomers.map((c) => (
+                <tr
+                  key={c.email}
+                  className={`border-t ${editingEmail === c.email ? "bg-yellow-50" : ""}`}
+                >
+                  {["email", "name", "age", "dob", "address", "bankInfo"].map((field) => (
+                    <td key={field} className="px-4 py-2">
+                      {editingEmail === c.email ? (
+                        <input
+                          value={c[field]}
+                          onChange={(e) => handleSave(c.email, field, e.target.value)}
+                          className="border border-gray-400 p-1 px-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      ) : (
+                        <span className="text-gray-900">{c[field]}</span>
+                      )}
+                    </td>
+                  ))}
+                  <td className="px-4 py-2 text-center font-semibold text-blue-600">
+                    {c.tickets || 0}
+                  </td>
+                  <td className="px-4 py-2 space-x-2">
+                    {editingEmail === c.email ? (
+                      <button
+                        onClick={() => setEditingEmail(null)}
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        ✔
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEdit(c.email)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Pencil className="w-4 h-4 inline" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDelete(c.email)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="w-4 h-4 inline" />
+                    </button>
+                    <button
+                      onClick={() => alert("Xem chi tiết khách hàng")}
+                      className="text-indigo-600 hover:text-indigo-800"
+                    >
+                      <Eye className="w-4 h-4 inline" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
