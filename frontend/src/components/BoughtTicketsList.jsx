@@ -196,7 +196,7 @@ const handleCancelTicket = () => {
             </button>
 
 <h3 className="text-2xl font-bold text-[#071d36] mb-4 text-center">
-  🎟️ Vé số #{selectedTicket.id}
+  🎟️ Vé Chuyến Bay #{selectedTicket.id}
 </h3>
 
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">

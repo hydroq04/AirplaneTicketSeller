@@ -121,7 +121,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
         `}
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="font-bold">Chuyến đi của bạn</h3>
+          <h3 className="font-bold">Phiếu Đặt Chỗ</h3>
           <button onClick={handleClose} className="text-2xl font-bold">×</button>
         </div>
 
