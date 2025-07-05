@@ -75,6 +75,31 @@ const flightSchema = new mongoose.Schema({
     min: 0
   },
 }, {
+  intermediateStops: [{
+    airport: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    code: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    arrivalTime: {
+      type: String,
+      trim: true
+    },
+    departureTime: {
+      type: String,
+      trim: true
+    },
+    stopDuration: {
+      type: Number, // Thời gian dừng tính bằng phút
+      default: 30
+    }
+  }],
+}, {
   timestamps: true
 });
 
