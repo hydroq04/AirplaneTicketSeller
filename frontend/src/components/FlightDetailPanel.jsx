@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, BoughtList, setLogin, index, setIndex, showPanel, setShowPanel,  }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -13,7 +14,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
 
     try {
       console.log(seatClass)
-      const res = await fetch('http://localhost:3000/api/bookings', {
+      const res = await fetch(`${API_Url}/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
