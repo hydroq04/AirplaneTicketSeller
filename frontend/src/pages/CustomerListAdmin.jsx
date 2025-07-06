@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const CustomerListAdmin = ({ showCustomerListAdmin }) => {
   const [customers, setCustomers] = useState([]);
@@ -23,7 +23,7 @@ const CustomerListAdmin = ({ showCustomerListAdmin }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/users");
+        const res = await fetch(`${API_Url}/api/users`);
         const data = await res.json();
         if (data.success && Array.isArray(data.users)) {
           // Map API user to table customer fields
