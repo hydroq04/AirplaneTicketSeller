@@ -20,8 +20,8 @@ const BoughtTicketsList = ({ showBought,selectedTicket, setSelectedTicket, user 
         const allTickets = bookings.flatMap((booking) =>
           booking.tickets.map((ticket) => ({
             ...ticket,
-            id: ticket._id,
-            date: booking.createdAt,
+            id: ticket.ticketNumber,
+            date: ticket.flight.timeFrom,
             flight: ticket.flight,
             pd: {
               travelClass: ticket.class || "Phổ thông",
