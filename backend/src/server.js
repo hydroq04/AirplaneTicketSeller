@@ -125,35 +125,36 @@ app.get('/api/flights', async (req, res) => {
 // Search flights
 app.get('/api/flights/search', async (req, res) => {
   try {
+<<<<<<< HEAD
     console.log('Search query:', req.query);
+=======
+>>>>>>> 9d072d31448da4dc6a407daa607b426d5d0bcf51
     const { origin, destination, date } = req.query;
 
     // Fetch all code mappings from database
     const codeMappings = await CodeMap.find();
-    console.log('Code mappings found:', codeMappings);
+    // console.log('Code mappings found:', codeMappings);
  
     let query = {};
     
     // Process origin parameter
     if (origin) {
-      const cityToCodeMap = {};
-      codeMappings.forEach(mapping => {
-        cityToCodeMap[mapping.city] = mapping.code;
-      });
-      
-      const originCode = cityToCodeMap[origin];
-      query.codeFrom = originCode;
+      for (const mapping of codeMappings) {
+        if (mapping.city == origin) {
+          query.codeFrom = mapping.code;
+          break;
+        }
+      }
     }
     
     // Process destination parameter
     if (destination) {
-      const cityToCodeMap = {};
-      codeMappings.forEach(mapping => {
-        cityToCodeMap[mapping.city] = mapping.code;
-      });
-
-      const destinationCode = cityToCodeMap[destination];
-      query.codeTo = destinationCode;
+      for (const mapping of codeMappings) {
+        if (mapping.city == destination) {
+          query.codeTo = mapping.code;
+          break;
+        }
+      }
     }
 
     if (date) {
