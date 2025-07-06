@@ -125,6 +125,29 @@ function FlightListAdmin() {
     return maxId + 1;
   };
 
+  // Hàm tính thời gian bay
+  const calculateDuration = (timeFrom, timeTo) => {
+    if (!timeFrom || !timeTo) return "1h 0m";
+    
+    try {
+      const startTime = new Date(timeFrom);
+      const endTime = new Date(timeTo);
+      
+      if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+        return "1h 0m";
+      }
+      
+      const durationMs = endTime - startTime;
+      const hours = Math.floor(durationMs / (1000 * 60 * 60));
+      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+      
+      return `${hours}h ${minutes}m`;
+    } catch (e) {
+      console.error('Error calculating duration:', e);
+      return "1h 0m";
+    }
+  };
+
   const handleAddFlight = async () => {
     try {
       // Map stopovers sang intermediateStops đúng format backend
@@ -144,7 +167,7 @@ function FlightListAdmin() {
         timeTo: newFlight.timeTo,
         codeFrom: newFlight.codeFrom,
         codeTo: newFlight.codeTo,
-        duration: newFlight.duration,
+        duration: calculateDuration(newFlight.timeFrom, newFlight.timeTo),
         capacity: Number(newFlight.capacity) || 180,
         passengerCount: Number(newFlight.passengerCount) || 0,
         price: Number(newFlight.price) || 0,
@@ -179,29 +202,6 @@ function FlightListAdmin() {
     } catch (err) {
       console.error('Error adding flight:', err);
       alert('Không thể thêm chuyến bay. Vui lòng thử lại sau. Lỗi: ' + err.message);
-    }
-  };
-
-  // Hàm tính thời gian bay
-  const calculateDuration = (timeFrom, timeTo) => {
-    if (!timeFrom || !timeTo) return "1h 0m";
-    
-    try {
-      const startTime = new Date(timeFrom);
-      const endTime = new Date(timeTo);
-      
-      if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
-        return "1h 0m";
-      }
-      
-      const durationMs = endTime - startTime;
-      const hours = Math.floor(durationMs / (1000 * 60 * 60));
-      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-      
-      return `${hours}h ${minutes}m`;
-    } catch (e) {
-      console.error('Error calculating duration:', e);
-      return "1h 0m";
     }
   };
 
@@ -437,17 +437,6 @@ function FlightListAdmin() {
                       value={newFlight.timeTo}
                       onChange={(e) => setNewFlight({ ...newFlight, timeTo: e.target.value })}
                       className="p-2 border rounded" 
-                    />
-                  </div>
-                  {/* Thêm mục nhập duration */}
-                  <div className="flex flex-col">
-                    <label className="text-sm text-gray-600 mb-1">Thời lượng bay (duration)</label>
-                    <input
-                      type="text"
-                      placeholder="VD: 1h 30m"
-                      value={newFlight.duration}
-                      onChange={e => setNewFlight({ ...newFlight, duration: e.target.value })}
-                      className="p-2 border rounded"
                     />
                   </div>
                 </div>
