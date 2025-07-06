@@ -125,10 +125,7 @@ app.get('/api/flights', async (req, res) => {
 // Search flights
 app.get('/api/flights/search', async (req, res) => {
   try {
-<<<<<<< HEAD
     console.log('Search query:', req.query);
-=======
->>>>>>> 9d072d31448da4dc6a407daa607b426d5d0bcf51
     const { origin, destination, date } = req.query;
 
     // Fetch all code mappings from database
