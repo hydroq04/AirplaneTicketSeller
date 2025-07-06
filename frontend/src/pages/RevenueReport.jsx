@@ -47,10 +47,82 @@ const RevenueReport = () => {
       </div>
     );
   }
-  if (error || !report) {
+  // Hiển thị phần chọn tháng/năm kể cả khi không có dữ liệu
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-xl text-red-600">
-        {error || "Không có dữ liệu báo cáo"}
+      <div className="min-h-screen bg-[#f4f6f8] px-6 py-10 max-w-6xl mx-auto text-gray-800 flex flex-col items-center justify-center">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <div className="flex items-center gap-2">
+            <label htmlFor="month" className="font-semibold text-gray-700">Tháng:</label>
+            <select
+              id="month"
+              value={month}
+              onChange={e => setMonth(Number(e.target.value))}
+              className="border rounded px-2 py-1"
+            >
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {String(i + 1).padStart(2, "0")}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="year" className="font-semibold text-gray-700">Năm:</label>
+            <select
+              id="year"
+              value={year}
+              onChange={e => setYear(Number(e.target.value))}
+              className="border rounded px-2 py-1"
+            >
+              {yearOptions.map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center text-xl text-red-600">
+          {error}
+        </div>
+      </div>
+    );
+  }
+  if (!report || !Array.isArray(report.flights) || report.flights.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#f4f6f8] px-6 py-10 max-w-6xl mx-auto text-gray-800 flex flex-col items-center justify-center">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <div className="flex items-center gap-2">
+            <label htmlFor="month" className="font-semibold text-gray-700">Tháng:</label>
+            <select
+              id="month"
+              value={month}
+              onChange={e => setMonth(Number(e.target.value))}
+              className="border rounded px-2 py-1"
+            >
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {String(i + 1).padStart(2, "0")}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="year" className="font-semibold text-gray-700">Năm:</label>
+            <select
+              id="year"
+              value={year}
+              onChange={e => setYear(Number(e.target.value))}
+              className="border rounded px-2 py-1"
+            >
+              {yearOptions.map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center text-xl text-gray-600">
+          Không có báo cáo vào tháng này
+        </div>
       </div>
     );
   }

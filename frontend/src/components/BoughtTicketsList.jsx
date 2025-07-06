@@ -20,6 +20,7 @@ const BoughtTicketsList = ({ showBought,selectedTicket, setSelectedTicket, user 
         const allTickets = bookings.flatMap((booking) =>
           booking.tickets.map((ticket) => ({
             ...ticket,
+            _id: ticket._id,
             id: ticket.ticketNumber,
             date: ticket.flight.timeFrom,
             flight: ticket.flight,
@@ -77,11 +78,19 @@ const handleCloseModal = () => {
   }, 500); // match với duration
 };
 
-const handleCancelTicket = () => {
+const handleCancelTicket = async () => {
   if (!selectedTicket) return;
 
-  // Xóa vé khỏi danh sách
-  setList((prevList) => prevList.filter((t) => t.id !== selectedTicket.id));
+  try {
+    console.log("Hủy vé:", selectedTicket);
+    const res = await fetch(`http://localhost:3000/api/tickets/${selectedTicket._id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Lỗi khi huỷ vé");
+    setList((prevList) => prevList.filter((t) => t.id !== selectedTicket.id));
+  } catch (err) {
+    alert("Không thể huỷ vé: " + err.message);
+  }
 
   // Đóng modal
   handleCloseModal();
