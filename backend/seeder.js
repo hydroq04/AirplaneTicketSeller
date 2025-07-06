@@ -8,6 +8,7 @@ const Ticket = require('./src/models/Ticket');
 const Payment = require('./src/models/Payment'); 
 const Report = require('./src/models/Report'); 
 const Regulation = require('./src/models/Regulation');
+const CodeMap = require('./src/models/CodeMap');
 
 dotenv.config({ path: path.join(__dirname, '.', '.env') });
 
@@ -151,141 +152,109 @@ const usersData = [
 ];
 
 const flightsData = [
-  // {
-  //   flightNumber: 'VN123',
-  //   airline: 'Vietnam Airlines',
-  //   origin: 'HAN', // Hanoi
-  //   destination: 'SGN', // Ho Chi Minh City
-  //   departureTime: new Date(new Date().setDate(new Date().getDate() + 5)), // 5 ngày tới
-  //   arrivalTime: new Date(new Date().setDate(new Date().getDate() + 5) + 3 * 60 * 60 * 1000), // 3 giờ sau
-  //   capacity: 150,
-  //   availableSeats: 150, // Sẽ được cập nhật sau khi tạo vé
-  //   price: 150.00
-  // },
-  // {
-  //   flightNumber: 'VJ456',
-  //   airline: 'Vietjet Air',
-  //   origin: 'SGN', // Ho Chi Minh City
-  //   destination: 'DAD', // Da Nang
-  //   departureTime: new Date(new Date().setDate(new Date().getDate() + 7)), // 7 ngày tới
-  //   arrivalTime: new Date(new Date().setDate(new Date().getDate() + 7) + 1.5 * 60 * 60 * 1000), // 1.5 giờ sau
-  //   capacity: 180,
-  //   availableSeats: 180,
-  //   price: 100.00
-  // },
-  // {
-  //   flightNumber: 'BL789',
-  //   airline: 'Bamboo Airways',
-  //   origin: 'DAD', // Da Nang
-  //   destination: 'HAN', // Hanoi
-  //   departureTime: new Date(new Date().setDate(new Date().getDate() + 10)), // 10 ngày tới
-  //   arrivalTime: new Date(new Date().setDate(new Date().getDate() + 10) + 1.8 * 60 * 60 * 1000), // 1.8 giờ sau
-  //   capacity: 120,
-  //   availableSeats: 120,
-  //   price: 120.00
-  // },
   {
     id: 1,
     airline: "Vietjet Air",
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(21, 5)).toUTCString()),
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(22, 5)).toUTCString()),
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(21, 5, 0)).toUTCString()),
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(22, 5, 0)).toUTCString()),
     codeFrom: "SGN",
     codeTo: "CXR",
     duration: '',
-    type: "Trực tiếp",
     price: 1570780,
     passengerCount: 42,
     capacity: 180,
+    intermediateStops: [],
   },
   {
     id: 2,
     airline: "Vietnam Airlines",
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(18, 40)).toUTCString()),
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(19, 45)).toUTCString()),
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(18, 40, 0)).toUTCString()),
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 10)).setHours(19, 45, 0)).toUTCString()),
     codeFrom: "SGN",
     codeTo: "CXR",
     duration: '',
-    type: "Trực tiếp",
     price: 2551000,
     passengerCount: 65,
     capacity: 210,
+    intermediateStops: [],
   },
   { 
     id: 3, 
     airline: "Vietjet Air", 
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(5, 30)).toUTCString()), 
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(6, 30)).toUTCString()), 
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(5, 30, 0)).toUTCString()), 
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(6, 30, 0)).toUTCString()), 
     codeFrom: "CXR", 
     codeTo: "SGN", 
     duration: '',
-    type: "Trực tiếp", 
     price: 1570780, 
     passengerCount: 38,
     capacity: 180,
+    intermediateStops: [],
   },
   {
     id: 4,
     airline: "Vietnam Airlines",
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(8, 55)).toUTCString()), 
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(10, 0)).toUTCString()), 
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(8, 55, 0)).toUTCString()), 
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(10, 0, 0)).toUTCString()), 
     codeFrom: "SGN",
     codeTo: "CXR",
     duration: '',
-    type: "Trực tiếp",
     price: 3296000,
     passengerCount: 78,
     capacity: 210,
+    intermediateStops: [],
   },
   { 
     id: 5, 
     airline: "Vietjet Air", 
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(12, 40)).toUTCString()), 
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(13, 40)).toUTCString()), 
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(12, 40, 0)).toUTCString()), 
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(13, 40, 0)).toUTCString()), 
     codeFrom: "SGN", 
     codeTo: "CXR", 
     duration: '',
-    type: "Trực tiếp", 
     price: 2489539, 
     passengerCount: 50,
     capacity: 180,
+    intermediateStops: [],
   },
   { 
     id: 6, 
     airline: "Vietjet Air", 
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(21, 5)).toUTCString()), 
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(22, 5)).toUTCString()), 
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(21, 5, 0)).toUTCString()), 
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(22, 5, 0)).toUTCString()), 
     codeFrom: "SGN", 
     codeTo: "CXR", 
     duration: '',
-    type: "Trực tiếp", 
     price: 1570780, 
     passengerCount: 44,
     capacity: 180,
+    intermediateStops: [],
   },
   { 
     id: 7, 
     airline: "Vietnam Airlines", 
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(18, 40)).toUTCString()), 
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(19, 45)).toUTCString()), 
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(18, 40, 0)).toUTCString()), 
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(19, 45, 0)).toUTCString()), 
     codeFrom: "CXR", 
     codeTo: "SGN", 
     duration: '',
-    type: "Trực tiếp", 
     price: 2551000, 
     passengerCount: 61,
-    capacity: 210,},
+    capacity: 210,
+    intermediateStops: [],
+  },
   { 
     id: 8,
     airline: "Vietnam Airlines",
-    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(18, 40)).toUTCString()), 
-    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(19, 45)).toUTCString()), 
+    timeFrom: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(18, 40, 0)).toUTCString()), 
+    timeTo: new String (new Date(new Date(new Date().setDate(new Date().getDate() + 11)).setHours(19, 45, 0)).toUTCString()), 
     codeFrom: "SGN",
     codeTo: "CXR",
     duration: '',
-    type: "Trực tiếp",
     price: 3296000,
     passengerCount: 75,
     capacity: 210,
+    intermediateStops: [],
   },
 ];
 
@@ -365,7 +334,7 @@ const importData = async () => {
       class: 'Thương gia',
       passengerType: 'adults',
       price: flight2.price,
-      status: 'reserved' // Vé đã đặt nhưng chưa xác nhận (chưa thanh toán)
+      status: 'confirmed',
     });
     console.log('Tickets created.');
 
@@ -404,7 +373,6 @@ const importData = async () => {
     await flight2.save();
     console.log('Flight available seats updated.');
 
-
     // 7. Tạo Reports (lấy dữ liệu mẫu đơn giản, có thể phức tạp hơn nếu cần)
     const today = new Date();
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -429,6 +397,7 @@ const importData = async () => {
       createdBy: adminUser._id
     });
 
+    // TODO: Thêm dữ liệu cho báo cáo tháng
     await Report.create({
       name: `Annual Summary - ${today.getFullYear()}`,
       type: 'yearly',
@@ -464,6 +433,22 @@ const importData = async () => {
       thoiGianHuyVe: 1
     });
     console.log('Default regulations created.');
+
+    // Tạo dữ liệu mã sân bay
+    await CodeMap.deleteMany();
+    await CodeMap.create([
+      { code: 'SGN', airportName: 'Sân bay Tân Sơn Nhất', city: 'Hồ Chí Minh' },
+      { code: 'CXR', airportName: 'Sân bay Cam Ranh', city: 'Khánh Hòa' },
+      { code: 'HAN', airportName: 'Sân bay Nội Bài', city: 'Hà Nội' },
+      { code: 'DAD', airportName: 'Sân bay Đà Nẵng', city: 'Đà Nẵng' },
+      { code: 'HUI', airportName: 'Sân bay Phú Bài', city: 'Huế' },
+      { code: 'UIH', airportName: 'Sân bay Phù Cát', city: 'Bình Định' },
+      { code: 'VCA', airportName: 'Sân bay Cần Thơ', city: 'Cần Thơ' },
+      { code: 'PQC', airportName: 'Sân bay Phú Quốc', city: 'Kiên Giang' },
+      { code: 'VCS', airportName: 'Sân bay Đồng Hới', city: 'Quảng Bình' },
+      { code: 'DLI', airportName: 'Sân bay Liên Khương', city: 'Đà Lạt' },
+    ]);
+    console.log('Airport codes created.');
 
     console.log('Data Imported Successfully!');
     process.exit();
