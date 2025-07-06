@@ -2,7 +2,7 @@
 This is our final project of Introduction to Software Engineering (HCMUS - 2025), built using React, Vite, JavaScript and MongoDB.
 
 Install all depandencies inside each part beforehand.  
-Edit the `PORT`, `MONGODB_URI`, `JWT_SECRET` and `CLIENT_URL` inside the `.env` file. `MONGO_URI` key can be obtained from MongoDB Atlas Cluster.
+Edit the `PORT`, `MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL` and `VITE_CLIENT_URL` inside the `.env` file. `MONGO_URI` key can be obtained from MongoDB Atlas Cluster. `CLIENT_URL` and `VITE_CLIENT_URL` must be equivalent.
 
 -----
 
