@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { TrendingUp, Calendar, LineChart } from "lucide-react";
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const RevenueReport = () => {
   const now = new Date();
@@ -27,7 +28,7 @@ const RevenueReport = () => {
     setLoading(true);
     setReport(null);
     setError("");
-    fetch(`http://localhost:3000/api/reports/monthly?month=${month}&year=${year}`)
+    fetch(`${API_Url}/api/reports/monthly?month=${month}&year=${year}`)
       .then((res) => {
         if (!res.ok) throw new Error("Lỗi server hoặc không có dữ liệu");
         return res.json();
