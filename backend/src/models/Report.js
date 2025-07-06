@@ -30,11 +30,6 @@ const reportSchema = new mongoose.Schema({
     }],
     additionalMetrics: mongoose.Schema.Types.Mixed
   },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
 }, {
   timestamps: true
 });
