@@ -8,31 +8,11 @@ const flightSchema = new mongoose.Schema({
     min: 1,
     trim: true
   },
-  flightNumber: {
-    type: String,
-    trim: true
-  },
   airline: {
     type: String,
     required: true,
     trim: true
   },
-  // // Original fields (mapped but optional)
-  // origin: {
-  //   type: String,
-  //   trim: true
-  // },
-  // destination: {
-  //   type: String,
-  //   trim: true
-  // },
-  // departureTime: {
-  //   type: Date
-  // },
-  // arrivalTime: {
-  //   type: Date
-  // },
-  // New fields from seeder.js
   timeFrom: {
     type: String,
     trim: true
