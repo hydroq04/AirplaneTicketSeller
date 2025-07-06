@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const LoginModal = ({ isOpen, onClose, setLogin }) => {
   const [step, setStep] = useState(1); // 1 | 2
@@ -89,7 +90,7 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
       bankInfo
     };
 
-    fetch('http://localhost:3000/api/users/register', {
+    fetch(`${API_Url}/api/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,7 +123,7 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
       //   setError("Không tìm thấy tài khoản. Vui lòng đăng ký.");
       //   return;
       // }
-      fetch ('http://localhost:3000/api/users/login', {
+      fetch (`${API_Url}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
