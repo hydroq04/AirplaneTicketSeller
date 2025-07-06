@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Pencil, Trash2, Eye, PlusCircle, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 
 const CustomerListAdmin = ({ showCustomerListAdmin }) => {
@@ -93,46 +91,7 @@ const CustomerListAdmin = ({ showCustomerListAdmin }) => {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">👥 Thông tin khách hàng</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          {showForm ? <X className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
-          {showForm ? "Đóng lại" : "Thêm khách hàng"}
-        </button>
       </div>
-
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="overflow-hidden mb-6"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 text-black gap-4 bg-gray-50 p-4 rounded-lg border">
-              {["email", "name", "age", "dob", "address", "bankInfo"].map((field) => (
-                <input
-                  key={field}
-                  placeholder={field}
-                  value={newCustomer[field]}
-                  onChange={(e) =>
-                    setNewCustomer({ ...newCustomer, [field]: e.target.value })
-                  }
-                  className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              ))}
-              <button
-                onClick={handleAdd}
-                className="col-span-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-              >
-                ➕ Xác nhận thêm khách hàng
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="flex text-black flex-col sm:flex-row gap-4 mb-4">
         <input
@@ -167,7 +126,6 @@ const CustomerListAdmin = ({ showCustomerListAdmin }) => {
                 <th className="px-4 py-2">Địa chỉ</th>
                 <th className="px-4 py-2">Ngân hàng</th>
                 <th className="px-4 py-2">🎫 Vé</th>
-                <th className="px-4 py-2">Tác vụ</th>
               </tr>
             </thead>
             <tbody>
@@ -191,35 +149,6 @@ const CustomerListAdmin = ({ showCustomerListAdmin }) => {
                   ))}
                   <td className="px-4 py-2 text-center font-semibold text-blue-600">
                     {c.tickets || 0}
-                  </td>
-                  <td className="px-4 py-2 space-x-2">
-                    {editingEmail === c.email ? (
-                      <button
-                        onClick={() => setEditingEmail(null)}
-                        className="text-green-600 hover:text-green-800"
-                      >
-                        ✔
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleEdit(c.email)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <Pencil className="w-4 h-4 inline" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleDelete(c.email)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="w-4 h-4 inline" />
-                    </button>
-                    <button
-                      onClick={() => alert("Xem chi tiết khách hàng")}
-                      className="text-indigo-600 hover:text-indigo-800"
-                    >
-                      <Eye className="w-4 h-4 inline" />
-                    </button>
                   </td>
                 </tr>
               ))}

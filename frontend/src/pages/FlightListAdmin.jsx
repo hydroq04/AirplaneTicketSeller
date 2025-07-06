@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Pencil, Trash2, PlusCircle, Check, X } from "lucide-react";
 import "tailwindcss/tailwind.css";
+import * as XLSX from "xlsx";
 
 // const initialFlights = [
 //   { id: "#01", airline: "Vietjet Air", timeFrom: "21:05", timeTo: "22:05", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 42 },
@@ -24,6 +25,8 @@ function FlightListAdmin() {
   const [searchAirline, setSearchAirline] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [excelLoading, setExcelLoading] = useState(false);
+  const [stopovers, setStopovers] = useState([]);
 
   useEffect(() => {
     fetchFlights();
@@ -104,64 +107,112 @@ function FlightListAdmin() {
     }
   };
 
+  // Reset stopovers when showForm toggled off
+  useEffect(() => {
+    if (!showForm) setStopovers([]);
+  }, [showForm]);
+
+  // Thêm chặng dừng mới
+  const handleAddStopover = () => {
+    setStopovers([...stopovers, { airport: "", stopTime: "" }]);
+  };
+
+  // Xoá chặng dừng
+  const handleRemoveStopover = (idx) => {
+    setStopovers(stopovers.filter((_, i) => i !== idx));
+  };
+
+  // Sửa thông tin chặng dừng
+  const handleStopoverChange = (idx, field, value) => {
+    setStopovers(stopovers.map((s, i) => i === idx ? { ...s, [field]: value } : s));
+  };
+
+  // Helper để tạo id tự tăng đơn giản phía client (nên dùng phía server thực tế)
+  const getNextFlightId = () => {
+    if (!flights || flights.length === 0) return 1;
+    const maxId = Math.max(...flights.map(f => Number(f.id) || 0));
+    return maxId + 1;
+  };
+
   const handleAddFlight = async () => {
     try {
+      // Map stopovers sang intermediateStops đúng format backend
+      
+      const intermediateStops = stopovers
+        .filter(s => s.airport && s.stopTime)
+        .map(s => ({
+          airport: s.airport,
+          stopDuration: Number(s.stopTime)
+        }));
+
+      const flightData = {
+        id: getNextFlightId(),
+        airline: newFlight.airline,
+        flightNumber: "", // hoặc sinh tự động nếu muốn
+        timeFrom: newFlight.timeFrom,
+        timeTo: newFlight.timeTo,
+        codeFrom: newFlight.codeFrom,
+        codeTo: newFlight.codeTo,
+        duration: newFlight.duration,
+        capacity: Number(newFlight.capacity) || 180,
+        passengerCount: Number(newFlight.passengerCount) || 0,
+        price: Number(newFlight.price) || 0,
+        intermediateStops, // đúng tên field backend
+      };
+      
       const response = await fetch('http://localhost:3000/api/flights', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newFlight),
+        body: JSON.stringify(flightData),
       });
 
-    // Xử lý chi tiết lỗi từ API
-    if (!response.ok) {
-      let errorMessage = `HTTP error! Status: ${response.status}`;
-      try {
-        const errorData = await response.json();
-        errorMessage += ` - ${errorData.message || 'Unknown error'}`;
-      } catch (e) {
-        // Nếu không thể parse JSON từ lỗi
+      // Xử lý chi tiết lỗi từ API
+      if (!response.ok) {
+        let errorMessage = `HTTP error! Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage += ` - ${errorData.message || 'Unknown error'}`;
+        } catch (e) {}
+        throw new Error(errorMessage);
       }
-      throw new Error(errorMessage);
+
+      setNewFlight({
+        airline: "", timeFrom: "", timeTo: "", codeFrom: "", codeTo: "",
+        duration: "", type: "Trực tiếp", price: 0, passengerCount: 0, capacity: 180
+      });
+      setShowForm(false);
+      setStopovers([]);
+      fetchFlights();
+    } catch (err) {
+      console.error('Error adding flight:', err);
+      alert('Không thể thêm chuyến bay. Vui lòng thử lại sau. Lỗi: ' + err.message);
     }
+  };
 
-    setNewFlight({
-      airline: "", timeFrom: "", timeTo: "", codeFrom: "", codeTo: "", 
-      duration: "", type: "Trực tiếp", price: 0, passengerCount: 0, capacity: 180
-    });
-    setShowForm(false);
+  // Hàm tính thời gian bay
+  const calculateDuration = (timeFrom, timeTo) => {
+    if (!timeFrom || !timeTo) return "1h 0m";
     
-    fetchFlights();
-  } catch (err) {
-    console.error('Error adding flight:', err);
-    console.log('Request data:', newFlight);
-    alert('Không thể thêm chuyến bay. Vui lòng thử lại sau. Lỗi: ' + err.message);
-  }
-};
-
-// Hàm tính thời gian bay
-const calculateDuration = (timeFrom, timeTo) => {
-  if (!timeFrom || !timeTo) return "1h 0m";
-  
-  try {
-    const startTime = new Date(timeFrom);
-    const endTime = new Date(timeTo);
-    
-    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+    try {
+      const startTime = new Date(timeFrom);
+      const endTime = new Date(timeTo);
+      
+      if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+        return "1h 0m";
+      }
+      
+      const durationMs = endTime - startTime;
+      const hours = Math.floor(durationMs / (1000 * 60 * 60));
+      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+      
+      return `${hours}h ${minutes}m`;
+    } catch (e) {
+      console.error('Error calculating duration:', e);
       return "1h 0m";
     }
-    
-    const durationMs = endTime - startTime;
-    const hours = Math.floor(durationMs / (1000 * 60 * 60));
-    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${hours}h ${minutes}m`;
-  } catch (e) {
-    console.error('Error calculating duration:', e);
-    return "1h 0m";
-  }
-};
+  };
 
   const filteredFlights = flights.filter(
     (f) =>
@@ -181,16 +232,85 @@ const calculateDuration = (timeFrom, timeTo) => {
     return flight._id ? `#${flight._id.substring(0, 5)}` : "#N/A";
   };
 
+  // Thêm nhiều chuyến bay từ file Excel
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setExcelLoading(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      let nextId = getNextFlightId();
+
+      for (const row of rows) {
+        // Parse intermediateStops nếu có cột intermediateStops dạng JSON string
+        let intermediateStops = [];
+        if (row.intermediateStops) {
+          try {
+            intermediateStops = JSON.parse(row.intermediateStops);
+          } catch {}
+        }
+        // Hoặc nếu có các cột stopover1_airport, stopover1_duration, ...
+        // (bạn có thể mở rộng nếu muốn)
+
+        const flight = {
+          id: nextId++,
+          airline: row.airline || "",
+          flightNumber: row.flightNumber || "",
+          timeFrom: row.timeFrom || "",
+          timeTo: row.timeTo || "",
+          codeFrom: row.codeFrom || "",
+          codeTo: row.codeTo || "",
+          duration: row.duration || "",
+          capacity: Number(row.capacity) || 180,
+          passengerCount: Number(row.passengerCount) || 0,
+          price: Number(row.price) || 0,
+          intermediateStops,
+        };
+
+        await fetch('http://localhost:3000/api/flights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(flight),
+        });
+      }
+      alert("Đã thêm các chuyến bay từ file Excel!");
+      fetchFlights();
+    } catch (err) {
+      alert("Lỗi khi đọc file hoặc thêm chuyến bay: " + err.message);
+    } finally {
+      setExcelLoading(false);
+      e.target.value = "";
+    }
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto text-black animate-fadeIn">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800 animate-slideUp">✈️ Danh sách chuyến bay</h1>
-        <button onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all">
-          <PlusCircle className="w-5 h-5" /> Thêm chuyến bay
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all">
+            <PlusCircle className="w-5 h-5" /> Thêm chuyến bay
+          </button>
+          <label className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 cursor-pointer transition-all">
+            <span>Thêm file Excel</span>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleExcelUpload}
+              className="hidden"
+              disabled={excelLoading}
+            />
+          </label>
+        </div>
       </div>
-
+      {excelLoading && (
+        <div className="mb-4 text-blue-600 font-semibold">Đang xử lý file Excel...</div>
+      )}
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <input type="text" placeholder="🔍 Mã chuyến" value={searchId} onChange={(e) => setSearchId(e.target.value)} className="p-2 border rounded w-full sm:w-1/2" />
         <input type="text" placeholder="🔍 Hãng" value={searchAirline} onChange={(e) => setSearchAirline(e.target.value)} className="p-2 border rounded w-full sm:w-1/2" />
@@ -271,20 +391,63 @@ const calculateDuration = (timeFrom, timeTo) => {
                       className="p-2 border rounded" 
                     />
                   </div>
-                  
+                  {/* Thêm mục nhập duration */}
                   <div className="flex flex-col">
-                    <label className="text-sm text-gray-600 mb-1">Loại chuyến bay</label>
-                    <select
-                      value={newFlight.type}
-                      onChange={(e) => setNewFlight({ ...newFlight, type: e.target.value })}
+                    <label className="text-sm text-gray-600 mb-1">Thời lượng bay (duration)</label>
+                    <input
+                      type="text"
+                      placeholder="VD: 1h 30m"
+                      value={newFlight.duration}
+                      onChange={e => setNewFlight({ ...newFlight, duration: e.target.value })}
                       className="p-2 border rounded"
-                    >
-                      <option value="Trực tiếp">Trực tiếp</option>
-                      <option value="1 chặng dừng">1 chặng dừng</option>
-                      <option value="2+ chặng dừng">2+ chặng dừng</option>
-                    </select>
+                    />
                   </div>
-                  
+                </div>
+                {/* Chặng dừng */}
+                <div className="mt-4 bg-white p-4 rounded border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-gray-700">Chặng dừng (nếu có)</span>
+                    <button
+                      type="button"
+                      onClick={handleAddStopover}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                    >
+                      + Thêm chặng dừng
+                    </button>
+                  </div>
+                  {stopovers.length === 0 && (
+                    <div className="text-gray-400 text-sm">Không có chặng dừng nào.</div>
+                  )}
+                  {stopovers.map((stop, idx) => (
+                    <div key={idx} className="flex gap-2 items-center mb-2">
+                      <input
+                        type="text"
+                        placeholder="Mã sân bay (VD: DAD)"
+                        value={stop.airport}
+                        onChange={e => handleStopoverChange(idx, "airport", e.target.value)}
+                        className="p-2 border rounded w-40"
+                      />
+                      <input
+                        type="number"
+                        min="10"
+                        placeholder="Thời gian dừng (phút)"
+                        value={stop.stopTime}
+                        onChange={e => handleStopoverChange(idx, "stopTime", e.target.value)}
+                        className="p-2 border rounded w-40"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveStopover(idx)}
+                        className="text-red-500 hover:text-red-700 px-2"
+                        title="Xoá chặng dừng"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mt-4">
                   <div className="flex flex-col">
                     <label className="text-sm text-gray-600 mb-1">Giá vé (VND)</label>
                     <input 

@@ -71,6 +71,7 @@ const Homeadmin = () => {
   setShowReportPage(false)
   setShowFlightListAdmin(false)
   setShowCustomerListAdmin(false)
+  setShowChangePolicy_(false)
 };
 
   useEffect(() => {

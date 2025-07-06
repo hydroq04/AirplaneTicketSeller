@@ -191,6 +191,7 @@ app.get('/api/flights/search', async (req, res) => {
 app.post('/api/flights', async (req, res) => {
   try {
     const flight = new Flight(req.body);
+    console.log('Creating flight:', req.body);
     await flight.save();
     res.status(201).json(flight);
   } catch (error) {
