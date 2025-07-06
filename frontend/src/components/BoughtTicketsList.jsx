@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const BoughtTicketsList = ({ showBought,selectedTicket, setSelectedTicket, user }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -12,7 +13,7 @@ const BoughtTicketsList = ({ showBought,selectedTicket, setSelectedTicket, user 
 
     const fetchTickets = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/bookings/user/${userId}`);
+        const res = await fetch(`${API_Url}/api/bookings/user/${userId}`);
         if (!res.ok) throw new Error("Lỗi kết nối");
 
         const bookings = await res.json();
@@ -83,7 +84,7 @@ const handleCancelTicket = async () => {
 
   try {
     console.log("Hủy vé:", selectedTicket);
-    const res = await fetch(`http://localhost:3000/api/tickets/${selectedTicket._id}`, {
+    const res = await fetch(`${API_Url}/api/tickets/${selectedTicket._id}`, {
       method: "DELETE",
     });
     if (!res.ok) throw new Error("Lỗi khi huỷ vé");
