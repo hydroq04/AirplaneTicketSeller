@@ -438,7 +438,7 @@ const importData = async () => {
     await CodeMap.deleteMany();
     await CodeMap.create([
       { code: 'SGN', airportName: 'Sân bay Tân Sơn Nhất', city: 'Hồ Chí Minh' },
-      { code: 'CXR', airportName: 'Sân bay Cam Ranh', city: 'Khánh Hòa' },
+      { code: 'CXR', airportName: 'Sân bay Cam Ranh', city: 'Nha Trang' },
       { code: 'HAN', airportName: 'Sân bay Nội Bài', city: 'Hà Nội' },
       { code: 'DAD', airportName: 'Sân bay Đà Nẵng', city: 'Đà Nẵng' },
       { code: 'HUI', airportName: 'Sân bay Phú Bài', city: 'Huế' },
