@@ -125,49 +125,35 @@ app.get('/api/flights', async (req, res) => {
 // Search flights
 app.get('/api/flights/search', async (req, res) => {
   try {
+    console.log('Received search request:', req.query);
     const { origin, destination, date } = req.query;
 
     // Fetch all code mappings from database
     const codeMappings = await CodeMap.find();
-    
-    // Create dynamic location map from database
-    const locationMap = {};
-    codeMappings.forEach(mapping => {
-      // Add mapping for the city name (lowercase for case-insensitive search)
-      locationMap[mapping.city.toLowerCase()] = mapping.code;
-      
-      // Add airport name mapping too if needed
-      if (mapping.airportName) {
-        locationMap[mapping.airportName.toLowerCase()] = mapping.code;
-      }
-    });
-
+    console.log('Code mappings found:', codeMappings);
+ 
     let query = {};
     
     // Process origin parameter
     if (origin) {
-      // Check if it's a full location name (case insensitive)
-      const normalizedOrigin = origin.toLowerCase().trim();
-      if (locationMap[normalizedOrigin]) {
-        // Use the airport code from our mapping
-        query.codeFrom = locationMap[normalizedOrigin];
-      } else {
-        // If not found in mapping, use as-is (might be a direct airport code)
-        query.codeFrom = origin;
-      }
+      const cityToCodeMap = {};
+      codeMappings.forEach(mapping => {
+        cityToCodeMap[mapping.city] = mapping.code;
+      });
+      
+      const originCode = cityToCodeMap[origin];
+      query.codeFrom = originCode;
     }
     
     // Process destination parameter
     if (destination) {
-      // Check if it's a full location name (case insensitive)
-      const normalizedDest = destination.toLowerCase().trim();
-      if (locationMap[normalizedDest]) {
-        // Use the airport code from our mapping
-        query.codeTo = locationMap[normalizedDest];
-      } else {
-        // If not found in mapping, use as-is (might be a direct airport code)
-        query.codeTo = destination;
-      }
+      const cityToCodeMap = {};
+      codeMappings.forEach(mapping => {
+        cityToCodeMap[mapping.city] = mapping.code;
+      });
+
+      const destinationCode = cityToCodeMap[destination];
+      query.codeTo = destinationCode;
     }
 
     if (date) {
