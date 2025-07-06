@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const RegulationPage = ({ showChangePolicy_ }) => {
   const [regulations, setRegulations] = useState(null);
@@ -21,7 +22,7 @@ const RegulationPage = ({ showChangePolicy_ }) => {
   useEffect(() => {
     const fetchRegulations = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/regulations");
+        const res = await fetch(`${API_Url}/api/regulations`);
         const data = await res.json();
         setRegulations(data);
         setEditRegulations(data);
@@ -49,7 +50,7 @@ const RegulationPage = ({ showChangePolicy_ }) => {
         fields.map(({ key }) => [key, editRegulations[key]])
       );
 
-      const res = await fetch("http://localhost:3000/api/regulations", {
+      const res = await fetch(`${API_Url}/api/regulations`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
