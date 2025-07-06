@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Pencil, Trash2, PlusCircle, Check, X } from "lucide-react";
+import { Pencil, Trash2, PlusCircle, Check, X, FileSpreadsheet } from "lucide-react";
 import "tailwindcss/tailwind.css";
 import * as XLSX from "xlsx";
 
@@ -26,6 +26,7 @@ function FlightListAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [excelLoading, setExcelLoading] = useState(false);
+  const [excelDialogOpen, setExcelDialogOpen] = useState(false);
   const [stopovers, setStopovers] = useState([]);
 
   useEffect(() => {
@@ -232,7 +233,29 @@ function FlightListAdmin() {
     return flight._id ? `#${flight._id.substring(0, 5)}` : "#N/A";
   };
 
-  // Thêm nhiều chuyến bay từ file Excel
+  // Excel template download
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        airline: "VietJet Air",
+        timeFrom: "2025-07-01T08:00",
+        timeTo: "2025-07-01T09:30",
+        codeFrom: "SGN",
+        codeTo: "HAN",
+        duration: "1h30m",
+        capacity: 180,
+        passengerCount: 10,
+        price: 1500000,
+        // intermediateStops: '[{"airport":"DAD","stopDuration":30}]'
+        intermediateStops: '[{"airport":"DAD","stopDuration":30},{"airport":"HUI","stopDuration":25}]'
+      }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Flights");
+    XLSX.writeFile(wb, "flights_template.xlsx");
+  };
+
+  // Excel import: map đúng format backend
   const handleExcelUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -246,16 +269,12 @@ function FlightListAdmin() {
       let nextId = getNextFlightId();
 
       for (const row of rows) {
-        // Parse intermediateStops nếu có cột intermediateStops dạng JSON string
         let intermediateStops = [];
         if (row.intermediateStops) {
           try {
             intermediateStops = JSON.parse(row.intermediateStops);
           } catch {}
         }
-        // Hoặc nếu có các cột stopover1_airport, stopover1_duration, ...
-        // (bạn có thể mở rộng nếu muốn)
-
         const flight = {
           id: nextId++,
           airline: row.airline || "",
@@ -284,6 +303,7 @@ function FlightListAdmin() {
     } finally {
       setExcelLoading(false);
       e.target.value = "";
+      setExcelDialogOpen(false);
     }
   };
 
@@ -296,18 +316,56 @@ function FlightListAdmin() {
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all">
             <PlusCircle className="w-5 h-5" /> Thêm chuyến bay
           </button>
-          <label className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 cursor-pointer transition-all">
-            <span>Thêm file Excel</span>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleExcelUpload}
-              className="hidden"
-              disabled={excelLoading}
-            />
-          </label>
+          <button
+            onClick={() => setExcelDialogOpen(true)}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all"
+          >
+            <FileSpreadsheet className="w-5 h-5" /> Thêm bằng file Excel
+          </button>
         </div>
       </div>
+      {/* Excel Dialog */}
+      {excelDialogOpen && (
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-black text-xl"
+              onClick={() => setExcelDialogOpen(false)}
+            >
+              ×
+            </button>
+            <h2 className="text-lg font-bold mb-2 flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5" /> Thêm chuyến bay bằng Excel
+            </h2>
+            <p className="mb-2 text-gray-700 text-sm">
+              Tải file mẫu, điền thông tin chuyến bay (bao gồm danh sách chặng dừng nếu có), sau đó chọn file để nhập.
+            </p>
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={handleDownloadTemplate}
+                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+              >
+                Tải file mẫu
+              </button>
+              <label className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm cursor-pointer">
+                Chọn file Excel
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleExcelUpload}
+                  className="hidden"
+                  disabled={excelLoading}
+                />
+              </label>
+            </div>
+            {excelLoading && <div className="text-blue-600 font-semibold">Đang xử lý file Excel...</div>}
+            <div className="text-xs text-gray-500 mt-2">
+              <b>Lưu ý:</b> Cột <code>intermediateStops</code> là chuỗi JSON, ví dụ:<br />
+              <code>[&#123;"airport":"DAD","stopDuration":30&#125;,&#123;"airport":"HUI","stopDuration":25&#125;]</code>
+            </div>
+          </div>
+        </div>
+      )}
       {excelLoading && (
         <div className="mb-4 text-blue-600 font-semibold">Đang xử lý file Excel...</div>
       )}
@@ -527,13 +585,13 @@ function FlightListAdmin() {
                         <div className="text-gray-800 font-semibold w-32">{f.airline}</div>
                         <div className="text-sm text-gray-700">{f.codeFrom} → {f.codeTo}</div>
                         <div className="text-sm text-gray-700">{f.timeFrom ? new Date(f.timeFrom).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''} - {f.timeTo ? new Date(f.timeTo).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</div>
-                        <div className="text-sm text-gray-700">{f.duration} • {f.type}</div>
+                        <div className="text-sm text-gray-700">{f.duration}</div>
                         <div className="text-sm text-indigo-600">{f.passengerCount}/{f.capacity} chỗ</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-blue-600 font-bold text-lg">{f.price?.toLocaleString()} đ</div>
-                        <button onClick={() => setEditingId(f._id)} className="text-blue-500 hover:text-blue-700"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(f._id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
+                        {/* <button onClick={() => setEditingId(f._id)} className="text-blue-500 hover:text-blue-700"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(f._id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button> */}
                       </div>
                     </div>
                   )}
