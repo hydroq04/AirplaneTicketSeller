@@ -2,17 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Pencil, Trash2, PlusCircle, Check, X, FileSpreadsheet } from "lucide-react";
 import "tailwindcss/tailwind.css";
 import * as XLSX from "xlsx";
-
-// const initialFlights = [
-//   { id: "#01", airline: "Vietjet Air", timeFrom: "21:05", timeTo: "22:05", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 42 },
-//   { id: "#02", airline: "Vietnam Airlines", timeFrom: "18:40", timeTo: "19:45", codeFrom: "SGN", codeTo: "CXR", duration: "1g 05", type: "Trực tiếp", price: 2551000, passengerCount: 65 },
-//   { id: "#03", airline: "Vietjet Air", timeFrom: "05:30", timeTo: "06:30", codeFrom: "CXR", codeTo: "SGN", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 38 },
-//   { id: "#04", airline: "Vietnam Airlines", timeFrom: "08:55", timeTo: "10:00", codeFrom: "SGN", codeTo: "CXR", duration: "1g 05", type: "Trực tiếp", price: 3296000, passengerCount: 78 },
-//   { id: "#05", airline: "Vietjet Air", timeFrom: "12:40", timeTo: "13:40", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 2489539, passengerCount: 50 },
-//   { id: "#06", airline: "Vietjet Air", timeFrom: "21:05", timeTo: "22:05", codeFrom: "SGN", codeTo: "CXR", duration: "1g", type: "Trực tiếp", price: 1570780, passengerCount: 44 },
-//   { id: "#07", airline: "Vietnam Airlines", timeFrom: "18:40", timeTo: "19:45", codeFrom: "CXR", codeTo: "SGN", duration: "1g 05", type: "Trực tiếp", price: 2551000, passengerCount: 61 },
-//   { id: "#08", airline: "Vietnam Airlines", timeFrom: "18:40", timeTo: "19:45", codeFrom: "SGN", codeTo: "CXR", duration: "1g 05", type: "Trực tiếp", price: 3296000, passengerCount: 75 }
-// ];
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 function FlightListAdmin() {
   const [flights, setFlights] = useState([]);
@@ -36,7 +26,7 @@ function FlightListAdmin() {
   const fetchFlights = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/flights');
+      const response = await fetch(`${API_Url}/api/flights`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -56,7 +46,7 @@ function FlightListAdmin() {
   const handleDelete = async (id) => {
     if (confirm("Bạn có chắc muốn xoá chuyến bay này?")) {
       try {
-        const response = await fetch(`http://localhost:3000/api/flights/${id}`, {
+        const response = await fetch(`${API_Url}/api/flights/${id}`, {
           method: 'DELETE',
         });
 
@@ -86,7 +76,7 @@ function FlightListAdmin() {
     try {
       const flightToUpdate = flights.find(f => f._id === editingId);
       
-      const response = await fetch(`http://localhost:3000/api/flights/${editingId}`, {
+      const response = await fetch(`${API_Url}/api/flights/${editingId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +151,7 @@ function FlightListAdmin() {
         intermediateStops, // đúng tên field backend
       };
       
-      const response = await fetch('http://localhost:3000/api/flights', {
+      const response = await fetch(`${API_Url}/api/flights`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -290,7 +280,7 @@ function FlightListAdmin() {
           intermediateStops,
         };
 
-        await fetch('http://localhost:3000/api/flights', {
+        await fetch(`${API_Url}/api/flights`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(flight),
