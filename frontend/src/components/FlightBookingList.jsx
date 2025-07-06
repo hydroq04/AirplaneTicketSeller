@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+const API_Url = import.meta.env.VITE_CLIENT_URL;
 
 const FlightBookingList = ({ setLogin, favorites, setFavorites, setSelectedFlight, bookingRoute}) => {
   const { from, to, departureDate } = bookingRoute;
@@ -23,7 +24,7 @@ const FlightBookingList = ({ setLogin, favorites, setFavorites, setSelectedFligh
           date: formatDate(departureDate)
         }).toString();
         console.log(query)
-        const response = await fetch(`http://localhost:3000/api/flights/search?${query}`);
+        const response = await fetch(`${API_Url}/api/flights/search?${query}`);
         const data = await response.json();
         setFlights(data);
       } catch (err) {
