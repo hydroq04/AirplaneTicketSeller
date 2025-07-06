@@ -12,6 +12,7 @@ const Ticket = require('./models/Ticket');
 const Payment = require('./models/Payment');
 const Report = require('./models/Report');
 const Regulation = require('./models/Regulation');
+const CodeMap = require('./models/CodeMap');
 
 // Initialize Express app
 const app = express();
@@ -126,22 +127,20 @@ app.get('/api/flights/search', async (req, res) => {
   try {
     const { origin, destination, date } = req.query;
 
-    // Location mapping (full names to airport codes)
-    const locationMap = {
-      'hồ chí minh': 'SGN',
-      'tp.hcm': 'SGN',
-      'sài gòn': 'SGN',
-      'hà nội': 'HAN',
-      'hanoi': 'HAN',
-      'đà nẵng': 'DAD',
-      'danang': 'DAD',
-      'nha trang': 'CXR',
-      'cam ranh': 'CXR',
-      'phú quốc': 'PQC',
-      'phu quoc': 'PQC',
-      'đà lạt': 'DLI',
-      'dalat': 'DLI'
-    };
+    // Fetch all code mappings from database
+    const codeMappings = await CodeMap.find();
+    
+    // Create dynamic location map from database
+    const locationMap = {};
+    codeMappings.forEach(mapping => {
+      // Add mapping for the city name (lowercase for case-insensitive search)
+      locationMap[mapping.city.toLowerCase()] = mapping.code;
+      
+      // Add airport name mapping too if needed
+      if (mapping.airportName) {
+        locationMap[mapping.airportName.toLowerCase()] = mapping.code;
+      }
+    });
 
     let query = {};
     
