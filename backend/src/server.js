@@ -154,15 +154,23 @@ app.get('/api/flights/search', async (req, res) => {
     }
 
     if (date) {
+      // date dạng dd/MM/yyyy
       const [day, month, year] = date.split('/');
       if (!day || !month || !year) {
         return res.status(400).json({ message: 'Sai định dạng ngày. Đúng: dd/MM/yyyy' });
       }
+      // Tạo khoảng thời gian từ 00:00 đến 23:59 ngày đó
+      const start = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+      const end = new Date(`${year}-${month}-${day}T23:59:59.999Z`);
 
-      const keyword = `${day} ${getMonthName(month)} ${year}`; // "30 Jun 2025"
-      query.timeFrom = { $regex: new RegExp(keyword) };
+      // Tìm tất cả chuyến bay có timeFrom nằm trong khoảng này
+      query.$expr = {
+        $and: [
+          { $gte: [{ $toDate: "$timeFrom" }, start] },
+          { $lte: [{ $toDate: "$timeFrom" }, end] }
+        ]
+      };
     }
-
     const flights = await Flight.find(query);
     res.json(flights);
   } catch (error) {
