@@ -569,8 +569,8 @@ function FlightListAdmin() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-blue-600 font-bold text-lg">{f.price?.toLocaleString()} đ</div>
-                        {/* <button onClick={() => setEditingId(f._id)} className="text-blue-500 hover:text-blue-700"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(f._id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button> */}
+                        <button onClick={() => setEditingId(f._id)} className="text-blue-500 hover:text-blue-700"><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(f._id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
