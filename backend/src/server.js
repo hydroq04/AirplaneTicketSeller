@@ -86,7 +86,9 @@ app.post('/api/users/login', async (req, res) => {
         email: user.email,
         role: user.role,
         bankInfo: user.bankInfo,
-        dob: user.dob
+        dob: user.dob,
+        cccd: user.cccd,
+        phone: user.phone
       }
     });
   } catch (error) {
