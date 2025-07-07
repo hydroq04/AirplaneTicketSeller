@@ -5,7 +5,45 @@ const BoughtTicketsList = ({ showBought,selectedTicket, setSelectedTicket, user 
   const [isClosing, setIsClosing] = useState(false);
   const [clickRect, setClickRect] = useState(null);
   const modalRef = useRef();
-  const [list, setList] = useState([])
+  const [list, setList] = useState([]);
+  const [airportMappings, setAirportMappings] = useState({});
+
+  const formatTime = (dateTimeStr) => {
+    try {
+      const date = new Date(dateTimeStr);
+      if (isNaN(date.getTime())) return dateTimeStr;
+      
+      return date.toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    } catch (error) {
+      return dateTimeStr; 
+    }
+  };
+
+  useEffect(() => {
+    const fetchAirportMappings = async () => {
+      try {
+        const res = await fetch(`${API_Url}/api/codemaps`);
+        if (!res.ok) throw new Error("Lỗi kết nối");
+
+        const mappings = await res.json();
+        const mapped = {};
+        mappings.forEach((item) => {
+          mapped[item.code] = item;
+        });
+        setAirportMappings(mapped);
+      } catch (err) {
+        console.error("Lỗi khi gọi API airport mappings:", err);
+        setAirportMappings({});
+      }
+    };
+
+    fetchAirportMappings();
+  }, []);
+
   useEffect(() => {
     console.log(user)
     const userId = user?._id || user?.id;
@@ -218,14 +256,14 @@ const handleCancelTicket = async () => {
   <div>
     <p className="mb-1 font-medium">🛫 Thời gian bay:</p>
     <p className="text-gray-800">
-      {selectedTicket.flight.timeFrom} → {selectedTicket.flight.timeTo}
+      {formatTime(selectedTicket.flight.timeFrom)} → {formatTime(selectedTicket.flight.timeTo)}
     </p>
   </div>
 
   <div>
     <p className="mb-1 font-medium">📍 Sân bay:</p>
     <p className="text-gray-800">
-      {selectedTicket.flight.codeFrom} → {selectedTicket.flight.codeTo}
+      {airportMappings[selectedTicket.flight.codeFrom]?.airportName || selectedTicket.flight.codeFrom} → {airportMappings[selectedTicket.flight.codeTo]?.airportName || selectedTicket.flight.codeTo}
     </p>
   </div>
 
