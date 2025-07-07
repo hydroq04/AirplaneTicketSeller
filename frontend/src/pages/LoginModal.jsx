@@ -15,6 +15,8 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
   const [dob, setDob] = useState("");
   const [address, setAddress] = useState("");
   const [bankInfo, setBankInfo] = useState("");
+  const [phone, setPhone] = useState("");
+  const [cccd, setCccd] = useState("");
 
   const [error, setError] = useState("");
   const [userList, setUserList] = useState([
@@ -63,7 +65,7 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
     setError("");
 
     if (mode === "register") {
-      if (!email || !password || !confirmPassword || !name || !age || !dob || !address || !bankInfo) {
+      if (!email || !password || !confirmPassword || !name || !age || !dob || !address || !bankInfo || !phone || !cccd) {
         setError("Vui lòng điền đầy đủ thông tin.");
         return;
       }
@@ -87,7 +89,9 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
       age, 
       dob, 
       address, 
-      bankInfo
+      bankInfo,
+      phone,
+      cccd
     };
 
     fetch(`${API_Url}/api/users/register`, {
@@ -249,6 +253,25 @@ const LoginModal = ({ isOpen, onClose, setLogin }) => {
                       <label className="block text-sm font-medium mb-1">Thông tin ngân hàng</label>
                       <textarea value={bankInfo} onChange={(e) => setBankInfo(e.target.value)}
                         className="w-full border border-blue-500 rounded-lg px-4 py-2 text-sm" placeholder="Ngân hàng, STK, chi nhánh..." />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Số điện thoại</label>
+                      <input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full border border-blue-500 rounded-lg px-4 py-2 text-sm"
+                        placeholder="Số điện thoại"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">CCCD</label>
+                      <input
+                        value={cccd}
+                        onChange={(e) => setCccd(e.target.value)}
+                        className="w-full border border-blue-500 rounded-lg px-4 py-2 text-sm"
+                        placeholder="CCCD (12 số)"
+                      />
                     </div>
                   </>
                 )}
