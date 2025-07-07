@@ -112,6 +112,20 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// Get all airport code mappings
+app.get('/api/codemaps', async (req, res) => {
+  try {
+    const codeMaps = await CodeMap.find();
+    res.json(codeMaps);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching airport code mappings', 
+      error: error.message 
+    });
+  }
+});
+
 // Get all flights
 app.get('/api/flights', async (req, res) => {
   try {
