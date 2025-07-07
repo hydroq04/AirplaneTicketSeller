@@ -5,6 +5,28 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
   const [isClosing, setIsClosing] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [airportMappings, setAirportMappings] = useState({});
+
+  useEffect(() => {
+    const fetchAirportMappings = async () => {
+      try {
+        const res = await fetch(`${API_Url}/api/codemaps`);
+        if (!res.ok) throw new Error("Lỗi kết nối");
+
+        const mappings = await res.json();
+        const mapped = {};
+        mappings.forEach((item) => {
+          mapped[item.code] = item;
+        });
+        setAirportMappings(mapped);
+      } catch (err) {
+        console.error("Lỗi khi gọi API airport mappings:", err);
+        setAirportMappings({});
+      }
+    };
+
+    fetchAirportMappings();
+  }, []);
 
   const handlePayment = async () => {
     setIsPaying(true);
@@ -62,7 +84,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
     }
   };
 
-
+  
 
   useEffect(() => {
     if (selectedFlight) {
@@ -129,7 +151,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
         <div className="p-6 space-y-4 text-sm">
           {/* Thông tin chuyến bay */}
           <div className="text-gray-500">
-            {selectedFlight.codeFrom} → {selectedFlight.codeTo} • {selectedFlight.duration}
+            {airportMappings?.[selectedFlight?.codeFrom]?.city || selectedFlight?.codeFrom} → {airportMappings?.[selectedFlight?.codeTo]?.city || selectedFlight?.codeTo} • {selectedFlight.duration}
           </div>
           <div className="text-lg font-semibold">{selectedFlight.airline}</div>
           <div className="text-xl font-bold text-red-600">
@@ -141,7 +163,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
             <p>🧍‍♂️Tổng số người: <strong>{totalPassengers}</strong></p>
             <p>👨 Số Lượng người lớn: <strong>{passengerData?.adults}</strong></p>
             <p>👶 Số Trẻ em: <strong>{passengerData?.children}</strong></p>
-            <p>🎫 Hạng khoang: <strong>{passengerData?.travelClass}</strong></p>
+            <p>🎫 Hạng vé: <strong>{passengerData?.travelClass}</strong></p>
             <p>📅 Ngày khởi hành: <strong>{formatDate(departureDate)}</strong></p>
           </div>
             Tổng tiền
@@ -166,7 +188,7 @@ const FlightDetailPanel = ({ selectedFlight, onClose, info, setBoughtList, Bough
             </button>
             )}
             <hr />
-            <span className="text-gray-700 space-y-1" >Các điều khoảng và ưu đãi:</span>
+            <span className="text-gray-700 space-y-1" >Các điều khoản và ưu đãi:</span>
             {/* Lợi ích */}
             <ul className="text-gray-700 space-y-1">
             <li>🧳 Hành lý xách tay 7kg</li>

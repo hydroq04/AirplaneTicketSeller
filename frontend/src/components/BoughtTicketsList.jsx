@@ -261,9 +261,18 @@ const handleCancelTicket = async () => {
   </div>
 
   <div>
-    <p className="mb-1 font-medium">📍 Sân bay:</p>
+    <p className="mb-1 font-medium">💸 Giá vé: </p>
     <p className="text-gray-800">
-      {airportMappings[selectedTicket.flight.codeFrom]?.airportName || selectedTicket.flight.codeFrom} → {airportMappings[selectedTicket.flight.codeTo]?.airportName || selectedTicket.flight.codeTo}
+      {selectedTicket.flight.price?.toLocaleString()} ₫
+    </p>
+  </div>
+
+
+
+  <div>
+    <p className="mb-1 font-medium">📍 Chuyến bay:</p>
+    <p className="text-gray-800">
+      {airportMappings[selectedTicket.flight.codeFrom]?.airportName || selectedTicket.flight.codeFrom} - {airportMappings[selectedTicket.flight.codeFrom]?.city || selectedTicket.flight.codeFrom} → {airportMappings[selectedTicket.flight.codeTo]?.airportName || selectedTicket.flight.codeTo} - {airportMappings[selectedTicket.flight.codeTo]?.city || selectedTicket.flight.codeFrom}
     </p>
   </div>
 
@@ -282,7 +291,17 @@ const handleCancelTicket = async () => {
   </div>
 
   <div>
-    <p className="mb-1 font-medium">💺 Hạng khoang:</p>
+    <p className="mb-1 font-medium">🆔 CCCD:</p>
+    <p className="text-gray-800">{user?.cccd || "Chưa cập nhật"}</p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">📞 Số điện thoại:</p>
+    <p className="text-gray-800">{user?.phone || "Chưa cập nhật"}</p>
+  </div>
+
+  <div>
+    <p className="mb-1 font-medium">💺 Hạng vé:</p>
     <p className="text-gray-800">{selectedTicket.pd.travelClass}</p>
   </div>
 </div>
